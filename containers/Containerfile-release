@@ -1,0 +1,32 @@
+FROM alpine:edge as builder
+RUN apk add git
+RUN apk add cmake
+RUN apk add ninja-is-really-ninja
+RUN apk add gcc g++
+RUN apk add python3
+
+# dependencies
+RUN apk add libressl-dev
+RUN apk add brotli-dev 
+RUN apk add zlib-dev
+
+ENV CC=gcc
+ENV CXX=g++
+
+ADD ./src /build/src
+COPY ./cmake /build/cmake
+COPY CMakeLists.txt /build
+
+WORKDIR /build/build
+RUN cmake -GNinja -DCMAKE_BUILD_TYPE=Release ../
+RUN cmake --build ./
+
+
+FROM alpine:edge
+RUN apk add libressl
+RUN apk add brotli
+RUN apk add zlib
+
+COPY --from=builder /build/build/supreme-octopus /app/app
+WORKDIR /app
+ENTRYPOINT ["/app/app"]

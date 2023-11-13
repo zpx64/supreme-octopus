@@ -1,0 +1,31 @@
+# for podman-compose
+# maybe can work with docker-compose
+# ONLY FOR TESTING!!
+
+services:
+  backend:
+    build:
+      context: ../
+      dockerfile: ./containers/Containerfile-debug
+    volumes:
+      - ../logs:/app/logs
+    network_mode: "host"
+    depends_on:
+      - postgres
+    restart: always
+    env_file:
+      - .env
+    security_opt:
+       - label:disable
+
+  postgres:
+    image: postgres:15.3-alpine3.18
+    ports:
+      - 5432:5432
+    volumes:
+      - ../db/postgres/data:/var/lib/postgresql/data
+    restart: always
+    env_file:
+      - .env
+    security_opt:
+       - label:disable
