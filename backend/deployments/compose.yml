@@ -6,7 +6,7 @@ services:
   backend:
     build:
       context: ../
-      dockerfile: ./containers/Containerfile-debug
+      dockerfile: ./build/Containerfile
     volumes:
       - ../logs:/app/logs
     network_mode: "host"
@@ -29,3 +29,4 @@ services:
       - .env
     security_opt:
        - label:disable
+
