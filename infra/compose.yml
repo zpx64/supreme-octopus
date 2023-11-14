@@ -1,0 +1,54 @@
+# i really to laze to make some includes of other  
+
+version: '3'
+
+services:
+  nginx:
+    image: nginx:1.25.0
+    ports:
+      - 443:443
+      - 80:80
+    volumes:
+      - ./static:/static:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - private
+    depends_on:
+      - backend
+    restart: always
+
+    security_opt:
+       - label:disable
+
+  backend:
+    build:
+      context: ../backend/
+      dockerfile: ./build/Dockerfile
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - private
+    depends_on:
+      - postgres
+    restart: always
+    env_file:
+      - .env
+    security_opt:
+       - label:disable
+
+  postgres:
+    image: postgres:15.3-alpine3.18
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    networks:
+      - private
+    restart: always
+    env_file:
+      - .env
+    security_opt:
+     - label:disable
+
+networks:
+  private:
+
+

@@ -1,2 +1,2 @@
-# supreme octupus (Суприм автобус)
+# supreme octupus 
 ## Geek ready social network :>
