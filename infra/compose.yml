@@ -38,6 +38,8 @@ services:
 
   postgres:
     image: postgres:15.3-alpine3.18
+    ports:
+      - 9876:5432 # only for testing
     volumes:
       - ./postgres/data:/var/lib/postgresql/data
     networks:

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ssleert/tzproj/internal/vars"
+	"github.com/zpx64/supreme-octopus/internal/vars"
 
 	"github.com/rs/zerolog"
 	"github.com/ssleert/limiter"

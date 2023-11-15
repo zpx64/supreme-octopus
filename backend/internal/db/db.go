@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ssleert/tzproj/internal/vars"
+	"github.com/zpx64/supreme-octopus/internal/vars"
+	"github.com/zpx64/supreme-octopus/internal/db/migrations"
 
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/rs/zerolog"
 )
 
@@ -17,7 +15,7 @@ type zerologLogger struct {
 }
 
 func (log zerologLogger) Printf(f string, v ...any) {
-	log.l.Debug().Msgf("MIGRATION: "+f[:len(f)-1], v...)
+	log.l.Debug().Msgf("MIGRATION: "+f, v...)
 }
 
 func (log zerologLogger) Verbose() bool {
@@ -42,32 +40,44 @@ func GetMigrationsDir() (string, error) {
 	return path + "/" + vars.MigrationsPath, nil
 }
 
+// TODO: rewrite without idiot logging interface
+//       it written to integrate zerolog with go-migrate
+//       but now we use tern and it uneeded
 func MakeMigrations(log *zerolog.Logger) error {
-	path, err := GetMigrationsDir()
+	logger := zerologLogger{log}
+
+	migrator, err := migrations.NewMigrator(GetConnString())
 	if err != nil {
 		return err
 	}
-	m, err := migrate.New(
-		"file://"+path,
-		GetConnString(),
-	)
-	if err != nil {
-		return err
-	}
-	m.Log = zerologLogger{log}
-	m.Log.Printf("created migration client ")
+	logger.Printf("created migration client")
 
 	if vars.PostgresForceDrop {
-		m.Log.Printf("force dropping db ")
-		err = m.Down()
-		if err != nil && err != migrate.ErrNoChange {
+		logger.Printf("force dropping all migrations")
+		err = migrator.MigrateTo(0)
+		if err != nil {
 			return err
 		}
 	}
-	m.Log.Printf("uping migrations ")
-	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
+
+	now, exp, info, err := migrator.Info()
+	if err != nil {
 		return err
 	}
+	logger.Printf("getted migration info")
+
+	logger.Printf("checking migration state")
+	if now < exp {
+		logger.Printf("current state: %s", info);
+
+		err = migrator.Migrate()
+		if err != nil {
+			return err
+		}
+		logger.Printf("migration successful")
+		return nil
+	}
+
+	logger.Printf("migration not needed")
 	return nil
 }

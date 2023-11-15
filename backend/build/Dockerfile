@@ -3,11 +3,12 @@ WORKDIR /app
 COPY ./go.mod ./go.sum ./
 RUN go mod download
 COPY . .
-RUN go build ./cmd/tzproj
+ENV GOCACHE=/root/.cache/go-build
+RUN --mount=type=cache,target="/root/.cache/go-build" \
+    go build ./cmd/supreme-octopus/
 
 FROM fedora:38
 RUN update-ca-trust
 WORKDIR /app
-COPY ./db/migrations /app/db/migrations
-COPY --from=builder /app/tzproj /app/app
+COPY --from=builder /app/supreme-octopus /app/app
 ENTRYPOINT ["./app"]

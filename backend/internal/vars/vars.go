@@ -25,23 +25,37 @@ var (
 	ErrIncorrectFilterKey   = errors.New("13: Invalid filter key.")
 
 	// values from env
-	HttpPort          = env.GetDefault("HTTP_PORT", "9876")
-	EndPointPrefix    = env.GetDefault("API_PREFIX", "")
-	LogStdout         = env.GetBoolDefault("LOG_STDOUT", true)
-	DebugMode         = env.GetBoolDefault("DEBUG_MODE", true)
-	PostgresUser      = env.GetDefault("POSTGRES_USER", "admin")
-	PostgresPassword  = env.GetDefault("POSTGRES_PASSWORD", "admin")
-	PostgresDbUrl     = env.GetDefault("POSTGRES_DB_URL", "postgres")
-	PostgresConnFlags = env.GetDefault("POSTGRES_CONN_FLAGS", "")
-	PostgresForceDrop = env.GetBoolDefault("POSTGRES_FORCE_DROP", false) // drop db before start
-	MaxBodyLen        = env.GetInt64Default("MAX_BODY_LEN", 16384)
-	LimitPerHour      = env.GetIntDefault("LIMIT_PER_HOUR", 60)
-	MigrationsPath    = env.GetDefault("MIGRATIONS_PATH", "./db/migrations")
+	HttpPort            = env.GetDefault("HTTP_PORT", "9876")
+	TimeoutSeconds      = env.GetIntDefault("TIMEOUT_SECONDS", 30)
+	ReadTimeoutSeconds  = env.GetIntDefault("READ_TIMEOUT_SECONDS", 60)
+	WriteTimeoutSeconds = env.GetIntDefault("WRITE_TIMEOUT_SECONDS", 80)
+	EndPointPrefix      = env.GetDefault("API_PREFIX", "")
+	LogStdout           = env.GetBoolDefault("LOG_STDOUT", true)
+	DebugMode           = env.GetBoolDefault("DEBUG_MODE", true)
+	PostgresUser        = env.GetDefault("POSTGRES_USER", "admin")
+	PostgresPassword    = env.GetDefault("POSTGRES_PASSWORD", "admin")
+	PostgresDbUrl       = env.GetDefault("POSTGRES_DB_URL", "postgres")
+	PostgresConnFlags   = env.GetDefault("POSTGRES_CONN_FLAGS", "")
+	PostgresForceDrop   = env.GetBoolDefault("POSTGRES_FORCE_DROP", false) // drop db before start
+	GlobalPow           = env.GetDefault("GLOBAL_POW", "btwsarseniyshouldsuckmydicknballs")
+	PowLen              = env.GetIntDefault("POW_LEN", 32)
+	PowRightCat         = env.GetBoolDefault("POW_RIGHT_CAT", true)
+	MaxBodyLen          = env.GetInt64Default("MAX_BODY_LEN", 16384)
+	LimitPerHour        = env.GetIntDefault("LIMIT_PER_HOUR", 60)
+	MigrationsPath      = env.GetDefault("MIGRATIONS_PATH", "./db/migrations")
+	
+	// len limits
+	EmailMaxLen    = env.GetIntDefault("EMAIL_MAX_LEN", 256)
+	NicknameMaxLen = env.GetIntDefault("NICKNAME_MAX_LEN", 256)
+	PasswordMaxLen = env.GetIntDefault("PASSWORD_MAX_LEN", 256)
 )
 
 func PrintVars(log *zerolog.Logger) {
 	log.Trace().
 		Str("HttpPort", HttpPort).
+		Int("TimeoutSeconds", TimeoutSeconds).
+		Int("ReadTimeoutSeconds", ReadTimeoutSeconds).
+		Int("WriteTimeoutSeconds", WriteTimeoutSeconds).
 		Str("EndPointPrefix", EndPointPrefix).
 		Bool("LogStdout", LogStdout).
 		Bool("DebugMode", DebugMode).

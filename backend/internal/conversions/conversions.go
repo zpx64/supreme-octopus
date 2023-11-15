@@ -1,8 +1,8 @@
 package conversions
 
 import (
-	"github.com/ssleert/tzproj/internal/db"
-	"github.com/ssleert/tzproj/pkg/nationalize"
+	"github.com/zpx64/supreme-octopus/internal/db"
+	"github.com/zpx64/supreme-octopus/pkg/nationalize"
 )
 
 func CountriesToNationalization(countries []nationalize.Country) []db.Nationalization {
