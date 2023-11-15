@@ -1,0 +1,10 @@
+.bg {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  background: url("./img.svg") repeat;
+  background-size: 3%;
+  overflow: hidden;
+  z-index: -1;
+}

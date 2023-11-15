@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'Chicago';
+  src: url("./assets/fonts/ChicagoBitmap-Regular.ttf");
+}
+
+body, input, button {
+  font-family: 'Chicago';
+}

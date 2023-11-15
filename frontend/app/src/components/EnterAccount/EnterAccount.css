@@ -1,0 +1,142 @@
+:root {
+  --window-height: 360px;
+  --input-padding: 10px;
+
+  --button-normal-bg-color: #FFF;
+  --button-invert-bg-color: #000;
+  --button-normal-border-color: #000;
+  --button-invert-border-color: #FFF;
+}
+
+#root {
+  height: 100vh;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  padding: 0;
+}
+
+button:active {
+}
+
+.window {
+  height: var(--window-height);
+  width: 615px;
+  position: relative;
+  margin: auto;
+  top: calc(50% - calc(var(--window-height) / 2));
+  background: #FFF;
+  border-radius: 12px;
+  border: 2.4px solid #000;
+
+  filter: drop-shadow(2.3999998569488525px 2.3999998569488525px 0px #000);
+}
+
+.windowHeader {
+  display: flex;
+  height: 35px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
+  border-bottom: 2.4px solid #000;
+  border-radius: 12px 12px 0 0;
+}
+
+.windowHeader > p {
+  margin: 0;
+  margin-left: 12px;
+  font-size: 14.4px;
+  line-height: 35px;
+}
+
+.windowHeader > div {
+  height: 18px;
+  width: 18px;
+  margin: 6px;
+  border-radius: 8px;
+  border: 2px solid #000;
+  margin-left: auto;
+}
+
+.windowArea {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section > p {
+  margin-top: 0;
+  margin-bottom: 3.5px;
+  font-size: 25px;
+}
+
+.section > input {
+  width: calc(100% - calc(var(--input-padding) * 2));
+  margin-top: 3.5px;
+  padding: 10px;
+  border-radius: 6px;
+
+  border: 2px solid #000;
+  border-radius: 12px;
+  box-shadow: 1.2px 1.2px 0px 0px #000;
+}
+
+.section > input:focus {
+  outline: none;
+}
+
+.buttonsContainer {
+  display: grid;
+  height: 80px;
+  width: 100%;
+  align-content: space-around;
+  justify-content: space-evenly;
+  align-items: center;
+  justify-items: center;
+}
+
+.login {
+  height: 32px;
+  width: 138px;
+  background-color: #FFF;
+  border-radius: 6px;
+  border: 2px solid #000;
+}
+
+.login:active {
+  background-color: var(--button-invert-bg-color);
+  border: 2px solid var(--button-invert-border-color);
+}
+
+.login:active p {
+  color: var(--button-invert-border-color);
+}
+
+.login > p {
+  font-size: 15px;
+  line-height: 32px;
+}
+
+.signup {
+  height: 21px;
+  width: 50px;
+  background-color: #FFF;
+  margin: 0;
+  border: none;
+  border-bottom: 2px solid #000;
+}
+
+.signup > p {
+  line-height: 21px;
+}
+
+@media screen and (max-width: 650px) and (max-height: 400px) {
+  
+}

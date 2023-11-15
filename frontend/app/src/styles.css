@@ -1,0 +1,23 @@
+.board {
+  height: 175px;
+  width: 300px;
+  margin: 100px;
+  background-color: white;
+}
+
+.board > div {
+  height: 45px;
+}
+
+.square {
+  height: 45px;
+  width: 45px;
+  border-radius: 0;
+  outline: 1px solid gray;
+  border: none;
+  background-color: white;
+  font-size: 2rem;
+  font-weight: 600;
+  float: left;
+}
+
