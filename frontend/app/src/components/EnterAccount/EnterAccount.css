@@ -1,5 +1,6 @@
 :root {
-  --window-height: 360px;
+  --window-height-login: 360px;
+  --window-height-signup: 636px;
   --input-padding: 10px;
 
   --button-normal-bg-color: #FFF;
@@ -14,21 +15,38 @@
 
 p {
   margin: 0;
+  user-select: none;
 }
 
 button {
   padding: 0;
 }
 
-button:active {
+label {
+  user-select: none;
 }
 
-.window {
-  height: var(--window-height);
+.windowL {
+  height: max-content;
   width: 615px;
   position: relative;
   margin: auto;
-  top: calc(50% - calc(var(--window-height) / 2));
+  margin-bottom: 200px;
+  top: calc(50% - calc(var(--window-height-login) / 2));
+  background: #FFF;
+  border-radius: 12px;
+  border: 2.4px solid #000;
+
+  filter: drop-shadow(2.3999998569488525px 2.3999998569488525px 0px #000);
+}
+
+.windowS {
+  height: max-content;
+  width: 615px;
+  position: relative;
+  margin: auto;
+  margin-bottom: 200px;
+  top: calc(50% - calc(var(--window-height-signup) / 2));
   background: #FFF;
   border-radius: 12px;
   border: 2.4px solid #000;
@@ -54,13 +72,17 @@ button:active {
   line-height: 35px;
 }
 
-.windowHeader > div {
+.windowHeader > a {
   height: 18px;
   width: 18px;
   margin: 6px;
   border-radius: 8px;
   border: 2px solid #000;
   margin-left: auto;
+}
+
+.windowHeader > a:hover { 
+  background-color: var(--button-invert-bg-color);
 }
 
 .windowArea {
@@ -92,17 +114,48 @@ button:active {
   outline: none;
 }
 
+.sectionOption {
+  display: flex;
+  height: 40px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.sectionOption > input {
+  height: 18px;
+  width: 18px;
+  margin: auto 0;
+  appearance: none;
+  border-radius: 100%;
+  border: 2px solid var(--button-normal-border-color);
+}
+
+.sectionOption > input:checked {
+  background-color: black;
+}
+
+.sectionOption > label {
+  margin: auto 0 auto 10px;
+  font-size: 19px;
+  line-height: 43px;
+}
+
+.sectionInactive {
+  opacity: 0.3;
+}
+
 .buttonsContainer {
   display: grid;
   height: 80px;
   width: 100%;
+  margin-bottom: 20px;
   align-content: space-around;
   justify-content: space-evenly;
   align-items: center;
   justify-items: center;
 }
 
-.login {
+.buttonsContainer > *:first-child {
   height: 32px;
   width: 138px;
   background-color: #FFF;
@@ -110,23 +163,23 @@ button:active {
   border: 2px solid #000;
 }
 
-.login:active {
+.buttonsContainer > *:first-child:active {
   background-color: var(--button-invert-bg-color);
   border: 2px solid var(--button-invert-border-color);
 }
 
-.login:active p {
+.buttonsContainer > *:first-child:active p {
   color: var(--button-invert-border-color);
 }
 
-.login > p {
+.buttonsContainer > *:first-child > p {
   font-size: 15px;
   line-height: 32px;
 }
 
-.signup {
+.buttonsContainer > *:nth-child(2) {
   height: 21px;
-  width: 50px;
+  width: max-content;
   background-color: #FFF;
   margin: 0;
   border: none;

@@ -4,7 +4,7 @@ import './Background.css';
 function Background() {
   return (
     <>
-      <div className="bg"></div>
+      <div id="pageBG"></div>
     </>
   );
 }

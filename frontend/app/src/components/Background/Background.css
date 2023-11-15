@@ -1,10 +1,22 @@
-.bg {
-  height: 100vh;
-  width: 100vw;
+#pageBG {
+  display: inline-block;
+  height: 200vh;
+  width: 200vw;
   position: fixed;
   top: 0;
   background: url("./img.svg") repeat;
-  background-size: 3%;
-  overflow: hidden;
+  background-size: 0.5%;
+  transform: rotate(25deg);
+  animation: loading-slide 150s linear infinite;
+  scale: 2;
   z-index: -1;
+}
+
+@keyframes loading-slide {
+  from {
+    background-position: top left;
+  }
+  to {
+    background-position: bottom right;
+  }
 }
