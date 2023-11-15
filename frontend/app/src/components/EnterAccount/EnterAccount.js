@@ -2,8 +2,44 @@ import React, { useState } from 'react';
 import './EnterAccount.css';
 
 
+function sendFormDataToServer(formData, fullNameEnabled) {
+  const { nickname, email, password, name, surname } = formData;
+
+  // Conditionally include name and surname only if fullNameEnabled is true
+  const dataToSend = fullNameEnabled
+    ? { nickname, email, password, name, surname }
+    : { nickname, email, password };
+
+  const jsonData = JSON.stringify(dataToSend);
+
+  console.log(jsonData);
+}
+
 function SignUpScreen({onLoginClick}) {
   const [isFullNameChecked, setIsFullNameChecked] = useState(false);
+  const [fullNameEnabled, setFullNameEnabled] = useState(false);
+  const [formData, setFormData] = useState({
+    nickname: '',
+    email: '',
+    password: '',
+    name: '',
+    surname: '',
+  });
+
+  const handleChangeValue = (e) => {
+    setFormData({...formData, [e.target.id]: e.target.value})
+    console.log(formData);
+    console.log(e.target.value);
+  }
+
+  const handleFullNameEnable = (e) => {
+    setFullNameEnabled(!fullNameEnabled);
+  }
+  
+  const handleSignUp = (e) => {
+    e.preventDefault();
+    sendFormDataToServer(formData, fullNameEnabled);
+  }
 
   return (
     <>
@@ -12,35 +48,35 @@ function SignUpScreen({onLoginClick}) {
           <p>account / signup</p>
           <a href="https://google.com/"> </a>
         </div>
-        <form className="windowArea">
+        <form className="windowArea" onSubmit={handleSignUp}>
           <div className="section">
             <p>Login</p>
-            <input type="text" id="login-input" name="login" placeholder="login" minLength="1" maxLength="256"/>
+            <input type="text" id="nickname" name="login" placeholder="login" minLength="1" maxLength="256" onChange={handleChangeValue}/>
           </div>
           <div className="section">
             <p>Email</p>
-            <input type="email" id="login-email" name="email" placeholder="email" minLength="1" maxLength="256"/>
+            <input type="email" id="email" name="email" placeholder="email" minLength="1" maxLength="256" onChange={handleChangeValue} />
           </div>
           <div className="section">
             <p>Password</p>
-            <input type="password" id="login-password" name="password" placeholder="password" minLength="1" maxLength="256"/>
+            <input type="password" id="password" name="password" placeholder="password" minLength="1" maxLength="256" onChange={handleChangeValue} />
           </div>
           <div className="sectionOption">
-            <input type="checkbox" id="full-name-checkbox" name="full-name" checked={isFullNameChecked} onChange={() => setIsFullNameChecked(!isFullNameChecked)} />
+            <input type="checkbox" id="full-name-checkbox" name="full-name" checked={isFullNameChecked} onChange={() => {setIsFullNameChecked(!isFullNameChecked); handleFullNameEnable()}} />
             <label>Full Name</label>
           </div>
           <div className={`section ${!isFullNameChecked ? 'sectionInactive' : ''}`}>
             <p>First Name</p>
-            <input type="text" id="first-name-input" name="first-name" placeholder="first name" minLength="1" maxLength="256" disabled={!isFullNameChecked}/>
+            <input type="text" id="name" name="first-name" placeholder="first name" minLength="1" maxLength="256" disabled={!isFullNameChecked} onChange={handleChangeValue} />
           </div>
           <div className={`section ${!isFullNameChecked ? 'sectionInactive' : ''}`}>
             <p>Last Name</p>
-            <input type="text" id="last-name-input" name="last-name" placeholder="last name" minLength="1" maxLength="256" disabled={!isFullNameChecked} />
+            <input type="text" id="surname" name="last-name" placeholder="last name" minLength="1" maxLength="256" disabled={!isFullNameChecked} onChange={handleChangeValue} />
           </div>
         </form>
         <div className="buttonsContainer">
-          <button className="login"><p>Sign Up</p></button>
-          <button className="signup" onClick={onLoginClick}><p>Login</p></button>
+          <button onClick={handleSignUp}><p>Sign Up</p></button>
+          <button onClick={onLoginClick}><p>Login</p></button>
         </div>
       </div>
     </>
@@ -48,6 +84,8 @@ function SignUpScreen({onLoginClick}) {
 }
 
 function LoginScreen({onSignUpClick}) {
+  const [formData, setFormData] = useState({});
+  
   return (
     <>
       <div className="windowL">
@@ -58,11 +96,11 @@ function LoginScreen({onSignUpClick}) {
         <div className="windowArea">
           <div className="section">
             <p>Login</p>
-            <input type="text" id="login-input" name="login" placeholder="login" minLength="1" maxLength="256"/>
+            <input type="text" id="login" name="login" placeholder="login" minLength="1" maxLength="256"/>
           </div>
           <div className="section">
             <p>Password</p>
-            <input type="password" id="login-input" name="password" placeholder="password" minLength="1" maxLength="256"/>
+            <input type="password" id="password" name="password" placeholder="password" minLength="1" maxLength="256"/>
           </div>
         </div>
         <div className="buttonsContainer">
