@@ -3,6 +3,7 @@ package reg
 import (
 	"context"
 	"net/http"
+	"errors"
 	"time"
 
 	"github.com/zpx64/supreme-octopus/internal/db"
@@ -28,11 +29,11 @@ var (
 )
 
 type Input struct {
-	Nickname string  `json:"nickname" validate:"required,min=3,max=256"`
-	Name     *string `json:"name,omitempty" validate:"min=2,max=256"`
-	Surname  *string `json:"surname,omitempty" validate:"min=2,max=256"`
-	Email    string  `json:"email" validate:"required,min=5,max=256"`
-	Password string  `json:"password" validate:"required,min=6,max=256"`
+	Nickname string  `json:"nickname"           validate:"required,alphaunicode,min=3,max=256"`
+	Name     *string `json:"name,omitempty"`
+	Surname  *string `json:"surname,omitempty"`
+	Email    string  `json:"email"              validate:"required,alphaunicode,min=5,max=256"`
+	Password string  `json:"password"           validate:"required,alphaunicode,min=6,max=256"`
 }
 
 type Output struct {
@@ -94,6 +95,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		out.Status = http.StatusInternalServerError
 		return
 	}
+	if in.Name == nil || in.Surname == nil ||
+		len(*in.Name) < 3 || len(*in.Name) > 256 ||
+		len(*in.Surname) < 3 || len(*in.Surname) > 256 {
+			log.Warn().Err(err).Msg("validation error")
+			
+			out.Err = errors.Join(
+				vars.ErrOnValidation,
+				errors.New("Len of surname or name is out of range."),
+			).Error()
+			out.Status = http.StatusUnprocessableEntity
+			return
+	}
 
 	if !valid.IsEmail(in.Email) {
 		log.Warn().
@@ -145,21 +158,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return err
 		},
 	)
-	if err == vars.ErrAlreadyInDb {
-		log.Warn().
-			Err(err).
-			Msg("data already in db")
-
-		out.Err = err.Error()
-		out.Status = http.StatusInternalServerError
-		return
-	}
 	if err != nil {
 		log.Warn().
 			Err(err).
 			Msg("an error with database")
 
-		out.Err = vars.ErrWithDb.Error()
+		if err == vars.ErrAlreadyInDb {
+			out.Err = vars.ErrAlreadyInDb.Error()
+		} else {
+			out.Err = vars.ErrWithDb.Error()
+		}
 		out.Status = http.StatusInternalServerError
 		return
 	}

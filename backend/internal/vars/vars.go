@@ -23,7 +23,7 @@ var (
 	ErrNotInDb              = errors.New("11: Not in db.")
 	ErrWithExternalApi      = errors.New("12: External api is inaccessible.")
 	ErrIncorrectFilterKey   = errors.New("13: Invalid filter key.")
-	ErrOnValidation         = errors.New("14: Validation error") // need to be wrapped
+	ErrOnValidation         = errors.New("14: Validation error: ") // need to be wrapped
 
 	// values from env
 	HttpPort            = env.GetDefault("HTTP_PORT", "9876")
