@@ -1,4 +1,4 @@
-package validator
+package valid
 
 import (
 	"strings"

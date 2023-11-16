@@ -10,7 +10,7 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
-	"github.com/zpx64/supreme-octopus/pkg/validator"
+	"github.com/zpx64/supreme-octopus/pkg/valid"
 	"github.com/zpx64/supreme-octopus/pkg/cryptograph"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -27,15 +27,15 @@ var (
 	dbConn *pgxpool.Pool
 )
 
-type input struct {
-	Nickname string  `json:"nickname"`
-	Name     *string `json:"name,omitempty"`
-	Surname  *string `json:"surname,omitempty"`
-	Email    string  `json:"email"`
-  Password string  `json:"password"`
+type Input struct {
+	Nickname string  `json:"nickname" validate:"required,min=3,max=256"`
+	Name     *string `json:"name,omitempty" validate:"min=2,max=256"`
+	Surname  *string `json:"surname,omitempty" validate:"min=2,max=256"`
+	Email    string  `json:"email" validate:"required,min=5,max=256"`
+	Password string  `json:"password" validate:"required,min=6,max=256"`
 }
 
-type output struct {
+type Output struct {
 	WritedId int    `json:"writed_id"`
 	Err      string `json:"error"`
 	Status   int    `json:"-"`
@@ -71,8 +71,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	log := hlog.FromRequest(r)
 	log.Info().Msg("connected")
 
-	in := input{}
-	out := output{
+	in := Input{}
+	out := Output{
 		Err: "null",
 		Status: http.StatusOK,
 	}
@@ -95,7 +95,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validator.IsEmail(in.Email) {
+	if !valid.IsEmail(in.Email) {
 		log.Warn().
 			Str("email", in.Email).
 			Msg("email is incorrect")
@@ -118,9 +118,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	dbModel := model.UserNCred{
 		User: model.User{
-			Nickname: in.Nickname,
-			Name:     in.Name,
-			Surname:  in.Surname,
+			Nickname:     in.Nickname,
+			Name:         in.Name,
+			Surname:      in.Surname,
+			CreationDate: time.Now(),
 		},
 		Credentials: model.UserCredentials{
 			Email:    in.Email,

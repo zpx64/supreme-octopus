@@ -4,12 +4,20 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"errors"
 	"strings"
 
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
 	"github.com/rs/zerolog"
 	"github.com/ssleert/limiter"
+	"github.com/go-playground/validator/v10"
+)
+
+// TODO: split functions in separate files
+
+var (
+	validate = validator.New(validator.WithRequiredStructEnabled())
 )
 
 type Result[T any] struct {
@@ -34,6 +42,18 @@ func GetAddrFromStr(addrNPort *string) string {
 	return strings.Split(
 		*addrNPort, ":",
 	)[0]
+}
+
+func ValidateStruct[T any](
+	log *zerolog.Logger, 
+	str *T,
+) error {	
+	log.Trace().Msg("validating data in struct")
+	err := validate.Struct(str)
+	if err != nil {
+		return errors.Join(vars.ErrOnValidation, err)
+	}
+	return nil
 }
 
 func LimitUserByRemoteAddr(
@@ -82,12 +102,15 @@ func ReadAllBody(log *zerolog.Logger, r *http.Request, body *[]byte) error {
 
 func UnmarshalJson[T any](
 	log *zerolog.Logger,
-	body *[]byte,
+	body io.Reader,
 	str *T,
 ) error {
 	log.Trace().Msg("unmarshaling json")
 
-	err := json.Unmarshal(*body, str)
+	dec := json.NewDecoder(body)
+	dec.DisallowUnknownFields()
+
+	err := dec.Decode(str)
 	if err != nil {
 		log.Warn().
 			Err(err).
@@ -115,13 +138,12 @@ func EndPointPrerequisites[T any](
 		return http.StatusRequestEntityTooLarge, err
 	}
 
-	var body []byte
-	err = ReadAllBody(log, r, &body)
+	err = UnmarshalJson(log, r.Body, in)
 	if err != nil {
-		return http.StatusInsufficientStorage, err
+		return http.StatusUnprocessableEntity, err
 	}
 
-	err = UnmarshalJson(log, &body, in)
+	err = ValidateStruct(log, in)
 	if err != nil {
 		return http.StatusUnprocessableEntity, err
 	}
