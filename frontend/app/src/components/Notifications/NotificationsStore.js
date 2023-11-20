@@ -20,8 +20,8 @@ class NotificationStore {
     }
     this.count++;
 
-    console.log(this.timeAdd);
-    console.log(this.count);
+    // console.log(this.timeAdd);
+    // console.log(this.count);
 
     runInAction(() => {
       this.notifications.push(notification);

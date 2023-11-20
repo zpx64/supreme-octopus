@@ -1,48 +1,73 @@
 import React, { useState } from 'react';
+import Joi from 'joi';
 import notificationStore from '../Notifications/NotificationsStore';
 import './EnterAccount.css';
 
 
-function validateData(dataset, action) {
-  let isWrong = false;
-
-  const checkValidationState = (type, data) => {
-    switch (type) {
-      case ("nickname"):
-        if (data.length >=3 && data.length <= 256) { return true } else { return false };
-      case ("email"):
-          if (data.length >= 5 && data.length <= 256) { return data.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-          )} else { return false };
-      case ("password"):
-        if (data.length >=6 && data.length <= 256) { return true } else { return false };
-      case ("name"):
-        if (data.length >=2 && data.length <= 256) { return true } else { return false };
-      case ("surname"):
-        if (data.length >=2 && data.length <= 256) { return true } else { return false };
-      default:
-        return false;
-    }
-  }
-
+function returnValidationScheme(action) {
   if (action == "SignUpMin") {
-    if (checkValidationState(dataset.nickname) == false) {
-      notificationStore.addNotification("Login is wrong, should be => 3", "err");
-      isWrong = true;
-    }
-    if (!checkValidationState(dataset.email)) {
-      notificationStore.addNotification("Email is wrong, should be >= 5", "err");
-      isWrong = true;
-    }
-    if (!checkValidationState(dataset.password)) {
-      notificationStore.addNotification("Password is wrong, should be >= 2", "err");
-      isWrong = true;
-    }
-  }
+    return Joi.object({
+      nickname: Joi.string()
+                .alphanum()
+                .min(3)
+                .max(256)
+                .label('Login')
+                .required(),
 
-  if (isWrong) {
-    return false;
+      email: Joi.string()
+             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+             .min(5)
+             .max(256)
+                .label('Email')
+             .required(),
+
+      password: Joi.string()
+                .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+                .min(6)
+                .max(256)
+                .label('Password')
+                .required(),
+    })
+  } else if (action == "SignUpFull") {
+    return Joi.object({
+      nickname: Joi.string()
+                .alphanum()
+                .min(3)
+                .max(256)
+                .label('Login')
+                .required(),
+
+      email: Joi.string()
+             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+             .min(5)
+             .max(256)
+                .label('Email')
+             .required(),
+
+      password: Joi.string()
+                .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+                .min(6)
+                .max(256)
+                .label('Password')
+                .required(),
+
+      name: Joi.string()
+                .alphanum()
+                .min(2)
+                .max(256)
+                .label('First name')
+                .required(),
+
+      surname: Joi.string()
+                .alphanum()
+                .min(2)
+                .max(256)
+                .label('Last Name')
+                .required(),
+    })
   }
 }
+
 
 
 async function sendFormDataToServer(formData, fullNameEnabled) {
@@ -57,35 +82,57 @@ async function sendFormDataToServer(formData, fullNameEnabled) {
       });
 
       if (!response.ok) {
-        notificationStore.addNotification(`HTTP Error: ${response.status}`, "err");
+        console.log(response.status);
       }
 
       const data = await response.json();
       console.log(data);
+
+      if (data.error != "null") {
+        if (data.error.includes("Already in db")) {
+          notificationStore.addNotification("Account already registered", "err");
+        } else {
+          notificationStore.addNotification(data.error, "err");
+        }
+      } else {
+        notificationStore.addNotification("Registration successful", "success");
+      }
     } catch(err) {
-        // notificationStore.addNotification(`HTTP Error: ${err.message}`, "err");
+        // TODO: Rewrite with normal error handling
+        notificationStore.addNotification(err.message, "err");
     }
   }
 
   if (!fullNameEnabled) {
-    if (validateData(formData, "SignUpMin")) {
+    try {
+      const schema = returnValidationScheme("SignUpMin");
+      const value = await schema.validateAsync({ nickname: formData.nickname,
+                                                 email: formData.email,
+                                                 password: formData.password });
 
-      const dataToSend = { nickname, email, password };
+      const dataToSend = value;
       const jsonData = JSON.stringify(dataToSend);
       sendData(jsonData);
     }
+    catch (err) {
+      notificationStore.addNotification(err.details[0].message, "err");
+    }
+    
   } else {
-    if (validateData("nickname", formData.nickname) === true &&
-      validateData("email", formData.email) &&
-      validateData("password", formData.password) === true &&
-      validateData("name", formData.name) === true &&
-      validateData("surname", formData.surname) === true) {
+    try {
+      const schema = returnValidationScheme("SignUpFull");
+      const value = await schema.validateAsync({ nickname: formData.nickname,
+                                                 email: formData.email,
+                                                 password: formData.password,
+                                                 name: formData.name,
+                                                 surname: formData.surname });
 
-      const dataToSend = { nickname, email, password, name, surname };
+      const dataToSend = value;
       const jsonData = JSON.stringify(dataToSend);
       sendData(jsonData);
-    } else {
-      notificationStore.addNotification(`Data is incorrect`, "err");
+    }
+    catch (err) {
+      notificationStore.addNotification(err.details[0].message, "err");
     }
   }
 }
