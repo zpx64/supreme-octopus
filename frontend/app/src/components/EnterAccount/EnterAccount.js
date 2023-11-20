@@ -3,23 +3,47 @@ import notificationStore from '../Notifications/NotificationsStore';
 import './EnterAccount.css';
 
 
-function validateData(type, data) {
-  switch (type) {
-    case ("nickname"):
-      if (data.length >=3 && data.length <= 256) { return true } else { return false };
-    case ("email"):
-        if (data.length >= 5 && data.length <= 256) { return data.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        )} else { return false };
-    case ("password"):
-      if (data.length >=6 && data.length <= 256) { return true } else { return false };
-    case ("name"):
-      if (data.length >=2 && data.length <= 256) { return true } else { return false };
-    case ("surname"):
-      if (data.length >=2 && data.length <= 256) { return true } else { return false };
-    default:
-      return false;
+function validateData(dataset, action) {
+  let isWrong = false;
+
+  const checkValidationState = (type, data) => {
+    switch (type) {
+      case ("nickname"):
+        if (data.length >=3 && data.length <= 256) { return true } else { return false };
+      case ("email"):
+          if (data.length >= 5 && data.length <= 256) { return data.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          )} else { return false };
+      case ("password"):
+        if (data.length >=6 && data.length <= 256) { return true } else { return false };
+      case ("name"):
+        if (data.length >=2 && data.length <= 256) { return true } else { return false };
+      case ("surname"):
+        if (data.length >=2 && data.length <= 256) { return true } else { return false };
+      default:
+        return false;
+    }
+  }
+
+  if (action == "SignUpMin") {
+    if (checkValidationState(dataset.nickname) == false) {
+      notificationStore.addNotification("Login is wrong, should be => 3", "err");
+      isWrong = true;
+    }
+    if (!checkValidationState(dataset.email)) {
+      notificationStore.addNotification("Email is wrong, should be >= 5", "err");
+      isWrong = true;
+    }
+    if (!checkValidationState(dataset.password)) {
+      notificationStore.addNotification("Password is wrong, should be >= 2", "err");
+      isWrong = true;
+    }
+  }
+
+  if (isWrong) {
+    return false;
   }
 }
+
 
 async function sendFormDataToServer(formData, fullNameEnabled) {
   const { nickname, email, password, name, surname } = formData;
@@ -44,16 +68,11 @@ async function sendFormDataToServer(formData, fullNameEnabled) {
   }
 
   if (!fullNameEnabled) {
-    if (validateData("nickname", formData.nickname) === true &&
-      validateData("email", formData.email) &&
-      validateData("password", formData.password) === true) {
+    if (validateData(formData, "SignUpMin")) {
 
       const dataToSend = { nickname, email, password };
       const jsonData = JSON.stringify(dataToSend);
       sendData(jsonData);
-    } else {
-      console.log(validateData("email", formData.email));
-      notificationStore.addNotification(`Data is incorrect`, "err");
     }
   } else {
     if (validateData("nickname", formData.nickname) === true &&
