@@ -1,12 +1,7 @@
 :root {
   --window-height-login: 360px;
   --window-height-signup: 636px;
-  --input-padding: 10px;
-
-  --button-normal-bg-color: #FFF;
-  --button-invert-bg-color: #000;
-  --button-normal-border-color: #000;
-  --button-invert-border-color: #FFF;
+  --input-enteraccount-padding: 10px;
 }
 
 #root {
@@ -100,7 +95,7 @@ label {
 }
 
 .section > input {
-  width: calc(100% - calc(var(--input-padding) * 2));
+  width: calc(100% - calc(var(--input-enteraccount-padding) * 2));
   margin-top: 3.5px;
   padding: 10px;
   border-radius: 6px;

@@ -1,0 +1,8 @@
+:root {
+  --window-bg-color: #FFF;
+
+  --button-normal-bg-color: #FFF;
+  --button-invert-bg-color: #000;
+  --button-normal-border-color: #000;
+  --button-invert-border-color: #FFF;
+}

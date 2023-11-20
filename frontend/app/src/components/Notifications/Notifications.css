@@ -1,0 +1,85 @@
+:root {
+  --notif-green-color: #89E75D;
+  --notif-yellow-color: #EAD049;
+  --notif-red-color: #E75D5D;
+}
+
+.NotificationContainer {
+  width: 100px;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.Notification {
+  height: 68px;
+  min-width: 125px;
+  width: max-content;
+  margin: 10px;
+  background-color: var(--window-bg-color);
+  border-radius: 7.805px;
+  border: 2.4px solid #000;
+  background: #FFF;
+  filter: drop-shadow(1.56px 1.56px 0px #000);
+  float: right;
+}
+
+.Notification > p {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  font-size: 1.15rem
+}
+
+.NotificationHeader {
+  display: flex;
+  height: 40px;
+}
+
+.NotificationHeader > div {
+  height: 15px;
+  width: 15px;
+  margin-top: 8px;
+  margin-left: 8px;
+  outline: 2px solid #000;
+  border-radius: 100%;
+}
+
+.NotificationHeader > button {
+  height: 20px;
+  width: 20px;
+  margin-left: auto;
+  margin-top: 4.5px;
+  margin-right: 4.5px;
+  border-radius: 7px;
+  border: 2.5px solid #000;
+  background: none;
+}
+
+.NotificationStatusGreen {
+  background-color: var(--notif-green-color);
+}
+
+.NotificationStatusYellow {
+  background-color: var(--notif-yellow-color);
+}
+
+.NotificationStatusRed {
+  background-color: var(--notif-red-color);
+}
+
+.NotificationHeader > button:hover {
+  background-color: black;
+}
+
+@keyframes notification-up {
+  0% {
+    margin-top: -130px;
+    opacity: 0;
+  }
+  100% {
+    margin-top: 0px;
+    opacity: 1;
+  }
+}

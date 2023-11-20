@@ -1,18 +1,74 @@
 import React, { useState } from 'react';
+import notificationStore from '../Notifications/NotificationsStore';
 import './EnterAccount.css';
 
 
-function sendFormDataToServer(formData, fullNameEnabled) {
+function validateData(type, data) {
+  switch (type) {
+    case ("nickname"):
+      if (data.length >=3 && data.length <= 256) { return true } else { return false };
+    case ("email"):
+        if (data.length >= 5 && data.length <= 256) { return data.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        )} else { return false };
+    case ("password"):
+      if (data.length >=6 && data.length <= 256) { return true } else { return false };
+    case ("name"):
+      if (data.length >=2 && data.length <= 256) { return true } else { return false };
+    case ("surname"):
+      if (data.length >=2 && data.length <= 256) { return true } else { return false };
+    default:
+      return false;
+  }
+}
+
+async function sendFormDataToServer(formData, fullNameEnabled) {
   const { nickname, email, password, name, surname } = formData;
 
-  // Conditionally include name and surname only if fullNameEnabled is true
-  const dataToSend = fullNameEnabled
-    ? { nickname, email, password, name, surname }
-    : { nickname, email, password };
+  const sendData = async (jsonData) => {
+    notificationStore.addNotification("Registering account...", "warn");
+    try {
+      const response = await fetch('http://localhost:80/api/reg', {
+        method: 'POST',
+        body: jsonData,
+      });
 
-  const jsonData = JSON.stringify(dataToSend);
+      if (!response.ok) {
+        notificationStore.addNotification(`HTTP Error: ${response.status}`, "err");
+      }
 
-  console.log(jsonData);
+      const data = await response.json();
+      console.log(data);
+    } catch(err) {
+        // notificationStore.addNotification(`HTTP Error: ${err.message}`, "err");
+    }
+  }
+
+  if (!fullNameEnabled) {
+    if (validateData("nickname", formData.nickname) === true &&
+      validateData("email", formData.email) &&
+      validateData("password", formData.password) === true) {
+
+      const dataToSend = { nickname, email, password };
+      const jsonData = JSON.stringify(dataToSend);
+      sendData(jsonData);
+    } else {
+      console.log(validateData("email", formData.email));
+      notificationStore.addNotification(`Data is incorrect`, "err");
+    }
+  } else {
+    if (validateData("nickname", formData.nickname) === true &&
+      validateData("email", formData.email) &&
+      validateData("password", formData.password) === true &&
+      validateData("name", formData.name) === true &&
+      validateData("surname", formData.surname) === true) {
+
+      const dataToSend = { nickname, email, password, name, surname };
+      const jsonData = JSON.stringify(dataToSend);
+      sendData(jsonData);
+    } else {
+      notificationStore.addNotification(`Data is incorrect`, "err");
+    }
+  }
 }
 
 function SignUpScreen({onLoginClick}) {
@@ -37,7 +93,6 @@ function SignUpScreen({onLoginClick}) {
   }
   
   const handleSignUp = (e) => {
-    e.preventDefault();
     sendFormDataToServer(formData, fullNameEnabled);
   }
 
@@ -51,15 +106,15 @@ function SignUpScreen({onLoginClick}) {
         <form className="windowArea" onSubmit={handleSignUp}>
           <div className="section">
             <p>Login</p>
-            <input type="text" id="nickname" name="login" placeholder="login" minLength="1" maxLength="256" onChange={handleChangeValue}/>
+            <input type="text" id="nickname" name="login" placeholder="login" minLength="3" maxLength="256" onChange={handleChangeValue}/>
           </div>
           <div className="section">
             <p>Email</p>
-            <input type="email" id="email" name="email" placeholder="email" minLength="1" maxLength="256" onChange={handleChangeValue} />
+            <input type="email" id="email" name="email" placeholder="email" minLength="5" maxLength="256" onChange={handleChangeValue} />
           </div>
           <div className="section">
             <p>Password</p>
-            <input type="password" id="password" name="password" placeholder="password" minLength="1" maxLength="256" onChange={handleChangeValue} />
+            <input type="password" id="password" name="password" placeholder="password" minLength="6" maxLength="256" onChange={handleChangeValue} />
           </div>
           <div className="sectionOption">
             <input type="checkbox" id="full-name-checkbox" name="full-name" checked={isFullNameChecked} onChange={() => {setIsFullNameChecked(!isFullNameChecked); handleFullNameEnable()}} />
@@ -67,7 +122,7 @@ function SignUpScreen({onLoginClick}) {
           </div>
           <div className={`section ${!isFullNameChecked ? 'sectionInactive' : ''}`}>
             <p>First Name</p>
-            <input type="text" id="name" name="first-name" placeholder="first name" minLength="1" maxLength="256" disabled={!isFullNameChecked} onChange={handleChangeValue} />
+            <input type="text" id="name" name="first-name" placeholder="first name" minLength="2" maxLength="256" disabled={!isFullNameChecked} onChange={handleChangeValue} />
           </div>
           <div className={`section ${!isFullNameChecked ? 'sectionInactive' : ''}`}>
             <p>Last Name</p>
@@ -95,12 +150,12 @@ function LoginScreen({onSignUpClick}) {
         </div>
         <div className="windowArea">
           <div className="section">
-            <p>Login</p>
-            <input type="text" id="login" name="login" placeholder="login" minLength="1" maxLength="256"/>
+            <p>Email</p>
+            <input type="email" id="email" name="email" placeholder="email" minLength="3" maxLength="256"/>
           </div>
           <div className="section">
             <p>Password</p>
-            <input type="password" id="password" name="password" placeholder="password" minLength="1" maxLength="256"/>
+            <input type="password" id="password" name="password" placeholder="password" minLength="6" maxLength="256"/>
           </div>
         </div>
         <div className="buttonsContainer">
