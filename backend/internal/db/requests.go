@@ -10,7 +10,7 @@ import (
 )
 
 func IsUserExist(
-	ctx  context.Context,
+	ctx context.Context,
 	conn *pgxpool.Conn,
 	data *model.UserNCred,
 ) (bool, error) {
@@ -28,7 +28,7 @@ func IsUserExist(
 		return false, err
 	}
 	defer rows.Close()
-	
+
 	i := 0
 	for rows.Next() {
 		err = rows.Scan(&exists[i])
@@ -47,7 +47,7 @@ func IsUserExist(
 // create new user with credentials
 // return created user id & error
 func CreateUser(
-	ctx  context.Context,
+	ctx context.Context,
 	conn *pgxpool.Conn,
 	data *model.UserNCred,
 ) (int, error) {
@@ -83,8 +83,8 @@ func CreateUser(
 }
 
 func GetCredentialsByEmail(
-	ctx   context.Context,
-	conn  *pgxpool.Conn,
+	ctx context.Context,
+	conn *pgxpool.Conn,
 	email string,
 ) (model.UserCredentials, error) {
 	var (

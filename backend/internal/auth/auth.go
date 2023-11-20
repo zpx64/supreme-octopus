@@ -1,14 +1,14 @@
 package auth
 
 import (
-	"errors"
 	"context"
+	"errors"
 
 	"github.com/zpx64/supreme-octopus/internal/db"
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
-	"github.com/ssleert/mumap"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ssleert/mumap"
 )
 
 type token struct {
@@ -23,11 +23,11 @@ type tokenMaps struct {
 }
 
 var (
-	ErrAccessTNotExpired = errors.New("Access token is not expired.")
-	ErrRefreshTExpired   = errors.New("Refresh token is expired.")
-	ErrRefreshTNotFound  = errors.New("Refresh token doesnt found.")
-	ErrAccessTNotFound   = errors.New("Access token doesnt found.")
-	ErrAccessTExpired    = errors.New("Access token expired.")
+	ErrAccessTNotExpired               = errors.New("Access token is not expired.")
+	ErrRefreshTExpired                 = errors.New("Refresh token is expired.")
+	ErrRefreshTNotFound                = errors.New("Refresh token doesnt found.")
+	ErrAccessTNotFound                 = errors.New("Access token doesnt found.")
+	ErrAccessTExpired                  = errors.New("Access token expired.")
 	ErrDeviceIdLenIsBiggerThanExpected = errors.New("Device id len is bigger than expected.")
 
 	dbConnPool *pgxpool.Pool

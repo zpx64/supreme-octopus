@@ -53,16 +53,16 @@ func GenTokensPair(
 	tokens.accessTokens.Set(
 		hash,
 		token{
-			date: timeNow,
-			id: id,
+			date:     timeNow,
+			id:       id,
 			deviceId: deviceId,
 		},
 	)
 	tokens.refreshTokens.Set(
 		uid,
 		token{
-			date: timeNow,
-			id: id,
+			date:     timeNow,
+			id:       id,
 			deviceId: deviceId,
 		},
 	)
@@ -83,7 +83,7 @@ func RegenTokensPair(
 	if ok {
 		if timeNow-t.date < vars.AccessTokenLifeSeconds {
 			return 0, "", ErrAccessTNotExpired
-		}	
+		}
 		tokens.accessTokens.Del(access)
 	}
 
@@ -99,4 +99,3 @@ func RegenTokensPair(
 
 	return GenTokensPair(t.id, t.deviceId)
 }
-

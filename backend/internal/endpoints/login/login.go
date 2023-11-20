@@ -3,14 +3,14 @@ package login
 import (
 	"context"
 	"net/http"
-	"time"
 	"strconv"
+	"time"
 
+	"github.com/zpx64/supreme-octopus/internal/auth"
 	"github.com/zpx64/supreme-octopus/internal/db"
 	"github.com/zpx64/supreme-octopus/internal/model"
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
-	"github.com/zpx64/supreme-octopus/internal/auth"
 
 	"github.com/zpx64/supreme-octopus/pkg/valid"
 
@@ -82,7 +82,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	in := Input{}
 	out := Output{
-		Err: "null",
+		Err:    "null",
 		Status: http.StatusOK,
 	}
 
@@ -109,14 +109,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Str("email", in.Email).
 			Msg("email is incorrect")
 
-			out.Err = vars.ErrEmailIncorrect.Error()
-			out.Status = http.StatusUnprocessableEntity
-			return
+		out.Err = vars.ErrEmailIncorrect.Error()
+		out.Status = http.StatusUnprocessableEntity
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(
 		r.Context(),
-		time.Duration(vars.TimeoutSeconds) * time.Second,
+		time.Duration(vars.TimeoutSeconds)*time.Second,
 	)
 	defer cancel()
 
@@ -139,14 +139,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	passwordCorrect := (
-		credentials.Password == utils.HashPassWithPows(
-			in.Password, credentials.Pow,
+	passwordCorrect := (credentials.Password == utils.HashPassWithPows(
+		in.Password, credentials.Pow,
 	))
 	if !passwordCorrect {
 		log.Warn().
 			Msg("user password is incorrect")
-			
+
 		out.Err = vars.ErrPassIncorrect.Error()
 		out.Status = http.StatusForbidden
 		return

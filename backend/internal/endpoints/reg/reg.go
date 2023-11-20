@@ -2,8 +2,8 @@ package reg
 
 import (
 	"context"
-	"net/http"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/zpx64/supreme-octopus/internal/db"
@@ -11,8 +11,8 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
-	"github.com/zpx64/supreme-octopus/pkg/valid"
 	"github.com/zpx64/supreme-octopus/pkg/cryptograph"
+	"github.com/zpx64/supreme-octopus/pkg/valid"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
@@ -74,7 +74,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	in := Input{}
 	out := Output{
-		Err: "null",
+		Err:    "null",
 		Status: http.StatusOK,
 	}
 
@@ -98,14 +98,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if in.Name == nil || in.Surname == nil ||
 		len(*in.Name) < 3 || len(*in.Name) > 256 ||
 		len(*in.Surname) < 3 || len(*in.Surname) > 256 {
-			log.Warn().Err(err).Msg("validation error")
-			
-			out.Err = errors.Join(
-				vars.ErrOnValidation,
-				errors.New("Len of surname or name is out of range."),
-			).Error()
-			out.Status = http.StatusUnprocessableEntity
-			return
+		log.Warn().Err(err).Msg("validation error")
+
+		out.Err = errors.Join(
+			vars.ErrOnValidation,
+			errors.New("Len of surname or name is out of range."),
+		).Error()
+		out.Status = http.StatusUnprocessableEntity
+		return
 	}
 
 	if !valid.IsEmail(in.Email) {
@@ -113,9 +113,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Str("email", in.Email).
 			Msg("email is incorrect")
 
-			out.Err = vars.ErrEmailIncorrect.Error()
-			out.Status = http.StatusUnprocessableEntity
-			return
+		out.Err = vars.ErrEmailIncorrect.Error()
+		out.Status = http.StatusUnprocessableEntity
+		return
 	}
 
 	localPow, err := cryptograph.GenRandPow(vars.PowLen)
@@ -145,7 +145,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(
 		r.Context(),
-		time.Duration(vars.TimeoutSeconds) * time.Second,
+		time.Duration(vars.TimeoutSeconds)*time.Second,
 	)
 	defer cancel()
 

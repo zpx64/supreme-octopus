@@ -2,16 +2,16 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
-	"errors"
 	"strings"
 
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog"
 	"github.com/ssleert/limiter"
-	"github.com/go-playground/validator/v10"
 )
 
 // TODO: split functions in separate files
@@ -45,9 +45,9 @@ func GetAddrFromStr(addrNPort *string) string {
 }
 
 func ValidateStruct[T any](
-	log *zerolog.Logger, 
+	log *zerolog.Logger,
 	str *T,
-) error {	
+) error {
 	log.Trace().Msg("validating data in struct")
 	err := validate.Struct(str)
 	if err != nil {

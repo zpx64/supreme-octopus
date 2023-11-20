@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/zpx64/supreme-octopus/internal/vars"
 	"github.com/zpx64/supreme-octopus/internal/db/migrations"
+	"github.com/zpx64/supreme-octopus/internal/vars"
 
 	"github.com/rs/zerolog"
 )
@@ -41,8 +41,9 @@ func GetMigrationsDir() (string, error) {
 }
 
 // TODO: rewrite without idiot logging interface
-//       it written to integrate zerolog with go-migrate
-//       but now we use tern and it uneeded
+//
+//	it written to integrate zerolog with go-migrate
+//	but now we use tern and it uneeded
 func MakeMigrations(log *zerolog.Logger) error {
 	logger := zerologLogger{log}
 
@@ -68,7 +69,7 @@ func MakeMigrations(log *zerolog.Logger) error {
 
 	logger.Printf("checking migration state")
 	if now < exp {
-		logger.Printf("current state: %s", info);
+		logger.Printf("current state: %s", info)
 
 		err = migrator.Migrate()
 		if err != nil {
