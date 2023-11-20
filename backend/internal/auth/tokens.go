@@ -12,7 +12,7 @@ import (
 // gen new hash by device id string
 func HashDeviceId(deviceId string) (uint64, error) {
 	if len(deviceId) > vars.MaxDeviceIdLen {
-		return 0, ErrDeviceIdLenIsBiggerThanExpected
+		return 0, vars.ErrAuthDeviceIdLenIsBiggerThanExpected
 	}
 	// i really dont trust what frontenders send for me)
 	return xxhash.Sum64String(deviceId), nil
@@ -24,10 +24,10 @@ func ValidateAccessToken(tkn uint64) (bool, error) {
 
 	t, ok := tokens.accessTokens.Get(tkn)
 	if !ok {
-		return false, ErrAccessTNotFound
+		return false, vars.ErrAuthAccessTNotFound
 	}
 	if timeNow-t.date >= vars.AccessTokenLifeSeconds {
-		return false, ErrAccessTExpired
+		return false, vars.ErrAuthAccessTExpired
 	}
 	return true, nil
 }
@@ -82,17 +82,17 @@ func RegenTokensPair(
 	t, ok := tokens.accessTokens.Get(access)
 	if ok {
 		if timeNow-t.date < vars.AccessTokenLifeSeconds {
-			return 0, "", ErrAccessTNotExpired
+			return 0, "", vars.ErrAuthAccessTNotExpired
 		}
 		tokens.accessTokens.Del(access)
 	}
 
 	t, ok = tokens.refreshTokens.Get(refresh)
 	if !ok {
-		return 0, "", ErrRefreshTNotFound
+		return 0, "", vars.ErrAuthRefreshTNotFound
 	}
 	if timeNow-t.date > vars.RefreshTokenLifeSeconds {
-		return 0, "", ErrRefreshTExpired
+		return 0, "", vars.ErrAuthRefreshTExpired
 	}
 
 	tokens.refreshTokens.Del(refresh)

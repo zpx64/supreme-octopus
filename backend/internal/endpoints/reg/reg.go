@@ -95,18 +95,44 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		out.Status = http.StatusInternalServerError
 		return
 	}
-	if in.Name == nil || in.Surname == nil ||
-		len(*in.Name) < 3 || len(*in.Name) > 256 ||
-		len(*in.Surname) < 3 || len(*in.Surname) > 256 {
-		log.Warn().Err(err).Msg("validation error")
 
-		out.Err = errors.Join(
-			vars.ErrOnValidation,
-			errors.New("Len of surname or name is out of range."),
-		).Error()
-		out.Status = http.StatusUnprocessableEntity
-		return
+	// TODO: rewrite with normal validation
+	if in.Name != nil || in.Surname != nil {
+		if in.Name == nil {	
+			log.Warn().Err(err).Msg("validation error")
+
+			out.Err = errors.Join(
+				vars.ErrOnValidation,
+				errors.New("Name is not defined."),
+			).Error()
+			out.Status = http.StatusUnprocessableEntity
+			return
+		}
+
+		if in.Surname == nil {	
+			log.Warn().Err(err).Msg("validation error")
+
+			out.Err = errors.Join(
+				vars.ErrOnValidation,
+				errors.New("Surname is not defined."),
+			).Error()
+			out.Status = http.StatusUnprocessableEntity
+			return
+		}
+
+		if len(*in.Name) < 3 || len(*in.Name) > 256 ||
+			len(*in.Surname) < 3 || len(*in.Surname) > 256 {
+			log.Warn().Err(err).Msg("validation error")
+
+			out.Err = errors.Join(
+				vars.ErrOnValidation,
+				errors.New("Len of surname or name is out of range."),
+			).Error()
+			out.Status = http.StatusUnprocessableEntity
+			return
+		}
 	}
+	// *==========================================*
 
 	if !valid.IsEmail(in.Email) {
 		log.Warn().
