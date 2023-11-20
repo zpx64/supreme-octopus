@@ -24,6 +24,7 @@ var (
 	ErrWithExternalApi      = errors.New("12: External api is inaccessible.")
 	ErrIncorrectFilterKey   = errors.New("13: Invalid filter key.")
 	ErrOnValidation         = errors.New("14: Validation error: ") // need to be wrapped
+	ErrEmailNotFound        = errors.New("15: Email not found.")
 
 	// values from env
 	HttpPort            = env.GetDefault("HTTP_PORT", "9876")
@@ -42,13 +43,15 @@ var (
 	PowLen              = env.GetIntDefault("POW_LEN", 32)
 	PowRightCat         = env.GetBoolDefault("POW_RIGHT_CAT", true)
 	MaxBodyLen          = env.GetInt64Default("MAX_BODY_LEN", 16384)
+	MaxDeviceIdLen      = env.GetIntDefault("MAX_DEVICE_ID_LEN", 256)
 	LimitPerHour        = env.GetIntDefault("LIMIT_PER_HOUR", 60)
+	DefaultMapSize      = env.GetIntDefault("DEFAULT_MAP_SIZE", 2048)
 	MigrationsPath      = env.GetDefault("MIGRATIONS_PATH", "./db/migrations")
-	
-	// len limits
-	EmailMaxLen    = env.GetIntDefault("EMAIL_MAX_LEN", 256)
-	NicknameMaxLen = env.GetIntDefault("NICKNAME_MAX_LEN", 256)
-	PasswordMaxLen = env.GetIntDefault("PASSWORD_MAX_LEN", 256)
+	EmailMaxLen         = env.GetIntDefault("EMAIL_MAX_LEN", 256)
+	NicknameMaxLen      = env.GetIntDefault("NICKNAME_MAX_LEN", 256)
+	PasswordMaxLen      = env.GetIntDefault("PASSWORD_MAX_LEN", 256)
+	AccessTokenLifeSeconds  = env.GetInt64Default("ACCESS_TOKEN_LIFE_SECONDS", 3600)
+	RefreshTokenLifeSeconds = env.GetInt64Default("REFRESH_TOKEN_LIFE_SECONDS", 1814400)
 )
 
 func PrintVars(log *zerolog.Logger) {

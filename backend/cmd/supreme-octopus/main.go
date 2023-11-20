@@ -15,6 +15,7 @@ import (
 	// endpoints
 	"github.com/zpx64/supreme-octopus/internal/endpoints/test"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/reg"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/login"
 
 	"github.com/justinas/alice"
 	"github.com/rs/zerolog"
@@ -30,8 +31,9 @@ type endPoint struct {
 
 var (
 	endPoints = [...]endPoint{
-		{"/test", test.Start, test.Handler, test.Stop},
-		{"/reg",  reg.Start,  reg.Handler,  reg.Stop},
+		{"/test",  test.Start,  test.Handler,  test.Stop},
+		{"/reg",   reg.Start,   reg.Handler,   reg.Stop},
+		{"/login", login.Start, login.Handler, login.Stop},
 	}
 	logger zerolog.Logger
 )

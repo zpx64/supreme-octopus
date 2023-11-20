@@ -29,11 +29,11 @@ var (
 )
 
 type Input struct {
-	Nickname string  `json:"nickname"           validate:"required,alphaunicode,min=3,max=256"`
+	Nickname string  `json:"nickname"           validate:"required,min=3,max=256"`
 	Name     *string `json:"name,omitempty"`
 	Surname  *string `json:"surname,omitempty"`
-	Email    string  `json:"email"              validate:"required,alphaunicode,min=5,max=256"`
-	Password string  `json:"password"           validate:"required,alphaunicode,min=6,max=256"`
+	Email    string  `json:"email"              validate:"required,min=5,max=256"`
+	Password string  `json:"password"           validate:"required,min=6,max=256"`
 }
 
 type Output struct {

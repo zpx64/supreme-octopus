@@ -11,8 +11,8 @@ type UserNCred struct {
 
 type User struct {
   Id           int       `json:"id"`
-  Nickname     string    `json:"nickname"`
   CreationDate time.Time `json:"creation_date"`
+  Nickname     string    `json:"nickname"`
   Name         *string   `json:"name,omitempty"`
   Surname      *string   `json:"surname,omitempty"`
 }
@@ -27,8 +27,8 @@ type UserCredentials struct {
 }
 
 type UserToken struct {
-  Id           int       `json:"-"`
-  DeviceId     string    `json:"device_id"`
-  RefreshToken string    `json:"refresh_token"`
-  TokenDate    time.Time `json:"token_date"`
+  Id           int    `json:"-"`
+  DeviceId     string `json:"device_id"`
+  RefreshToken string `json:"refresh_token"`
+  TokenDate    int64  `json:"token_date"`
 }

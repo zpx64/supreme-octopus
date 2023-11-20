@@ -13,6 +13,8 @@ import (
 	"os"
 )
 
+
+// TODO: rewrite with env vars
 const (
 	// should random be crypt safe?
 	// if u dont know u can fuck urself
