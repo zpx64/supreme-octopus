@@ -32,6 +32,7 @@ var (
 	ErrAuthAccessTExpired                  = errors.New("20: Access token expired.")
 	ErrAuthDeviceIdLenIsBiggerThanExpected = errors.New("21: Device id len is bigger than expected.")
 	ErrWithAuthInternal                    = errors.New("22: Internal Auth error.")
+	ErrIncorrectUintValue                  = errors.New("23: Incorrect uint value.")
 
 	// values from env
 	HttpPort                = env.GetDefault("HTTP_PORT", "9876")

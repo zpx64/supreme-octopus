@@ -14,6 +14,7 @@ import (
 
 	// endpoints
 	"github.com/zpx64/supreme-octopus/internal/endpoints/login"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/refresh"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/reg"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/test"
 
@@ -34,6 +35,7 @@ var (
 		{"/test", test.Start, test.Handler, test.Stop},
 		{"/reg", reg.Start, reg.Handler, reg.Stop},
 		{"/login", login.Start, login.Handler, login.Stop},
+		{"/refresh", refresh.Start, refresh.Handler, refresh.Stop},
 	}
 	logger zerolog.Logger
 )
