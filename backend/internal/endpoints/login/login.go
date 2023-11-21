@@ -134,7 +134,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Err(err).
 			Msg("an error with database")
 
-		out.Err = vars.ErrWithDb.Error()
+		if err == vars.ErrNotInDb {
+			out.Err = err.Error()
+		} else {
+			out.Err = vars.ErrWithDb.Error()
+		}
 		out.Status = http.StatusInternalServerError
 		return
 	}

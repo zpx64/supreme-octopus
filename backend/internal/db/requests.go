@@ -7,6 +7,7 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 )
 
 func IsUserExist(
@@ -106,6 +107,9 @@ func GetCredentialsByEmail(
 		&credentials_pow,
 	)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return model.UserCredentials{}, vars.ErrNotInDb
+		}
 		return model.UserCredentials{}, err
 	}
 
