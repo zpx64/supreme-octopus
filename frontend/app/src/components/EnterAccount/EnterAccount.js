@@ -1,141 +1,9 @@
-import React, { useState } from 'react';
-import Joi from 'joi';
-import notificationStore from '../Notifications/NotificationsStore';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { sendSignUpDataToServer, sendLoginDataToServer } from './sendData';
+
 import './EnterAccount.css';
 
-
-function returnValidationScheme(action) {
-  if (action == "SignUpMin") {
-    return Joi.object({
-      nickname: Joi.string()
-                .alphanum()
-                .min(3)
-                .max(256)
-                .label('Login')
-                .required(),
-
-      email: Joi.string()
-             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-             .min(5)
-             .max(256)
-                .label('Email')
-             .required(),
-
-      password: Joi.string()
-                .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-                .min(6)
-                .max(256)
-                .label('Password')
-                .required(),
-    })
-  } else if (action == "SignUpFull") {
-    return Joi.object({
-      nickname: Joi.string()
-                .alphanum()
-                .min(3)
-                .max(256)
-                .label('Login')
-                .required(),
-
-      email: Joi.string()
-             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-             .min(5)
-             .max(256)
-                .label('Email')
-             .required(),
-
-      password: Joi.string()
-                .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-                .min(6)
-                .max(256)
-                .label('Password')
-                .required(),
-
-      name: Joi.string()
-                .alphanum()
-                .min(2)
-                .max(256)
-                .label('First name')
-                .required(),
-
-      surname: Joi.string()
-                .alphanum()
-                .min(2)
-                .max(256)
-                .label('Last Name')
-                .required(),
-    })
-  }
-}
-
-
-
-async function sendFormDataToServer(formData, fullNameEnabled) {
-  const { nickname, email, password, name, surname } = formData;
-
-  const sendData = async (jsonData) => {
-    notificationStore.addNotification("Registering account...", "warn");
-    try {
-      const response = await fetch('http://localhost:80/api/reg', {
-        method: 'POST',
-        body: jsonData,
-      });
-
-      if (!response.ok) {
-        console.log(response.status);
-      }
-
-      const data = await response.json();
-      console.log(data);
-
-      if (data.error != "null") {
-        if (data.error.includes("Already in db")) {
-          notificationStore.addNotification("Account already registered", "err");
-        } else {
-          notificationStore.addNotification(data.error, "err");
-        }
-      } else {
-        notificationStore.addNotification("Registration successful", "success");
-      }
-    } catch(err) {
-        // TODO: Rewrite with normal error handling
-        notificationStore.addNotification(err.message, "err");
-    }
-  }
-
-  if (!fullNameEnabled) {
-    try {
-      const schema = returnValidationScheme("SignUpMin");
-      const value = await schema.validateAsync({ nickname: formData.nickname,
-                                                 email: formData.email,
-                                                 password: formData.password });
-
-      const dataToSend = value;
-      const jsonData = JSON.stringify(dataToSend);
-      sendData(jsonData);
-    }
-    catch (err) {
-      notificationStore.addNotification(err.details[0].message, "err");
-    }
-    
-  } else {
-    try {
-      const schema = returnValidationScheme("SignUpFull");
-      const value = await schema.validateAsync({ nickname: formData.nickname,
-                                                 email: formData.email,
-                                                 password: formData.password,
-                                                 name: formData.name,
-                                                 surname: formData.surname });
-
-      const dataToSend = value;
-      const jsonData = JSON.stringify(dataToSend);
-      sendData(jsonData);
-    }
-    catch (err) {
-      notificationStore.addNotification(err.details[0].message, "err");
-    }
-  }
-}
 
 function SignUpScreen({onLoginClick}) {
   const [isFullNameChecked, setIsFullNameChecked] = useState(false);
@@ -148,23 +16,27 @@ function SignUpScreen({onLoginClick}) {
     surname: '',
   });
 
+  const navigator = useNavigate();
+
   const handleChangeValue = (e) => {
     setFormData({...formData, [e.target.id]: e.target.value})
-    console.log(formData);
-    console.log(e.target.value);
   }
 
   const handleFullNameEnable = (e) => {
     setFullNameEnabled(!fullNameEnabled);
   }
   
-  const handleSignUp = (e) => {
-    sendFormDataToServer(formData, fullNameEnabled);
+  const handleSignUp = async(e) => {
+    const result = await sendSignUpDataToServer(formData, fullNameEnabled);
+    console.log(result);
+    if (result) {
+      navigator('/login');
+    }
   }
 
   return (
     <>
-      <div className="windowS">
+      <div className="windowSignUp">
         <div className="windowHeader">
           <p>account / signup</p>
           <a href="https://google.com/"> </a>
@@ -206,10 +78,23 @@ function SignUpScreen({onLoginClick}) {
 
 function LoginScreen({onSignUpClick}) {
   const [formData, setFormData] = useState({});
+  const navigator = useNavigate();
+
+  const handleChangeValue = (e) => {
+    setFormData({...formData, [e.target.id]: e.target.value});
+  }
+
+  const handleLogin = async() => {
+    const result = await sendLoginDataToServer(formData);
+    console.log(result);
+    if (result) {
+      navigator('/');
+    }
+  }
   
   return (
     <>
-      <div className="windowL">
+      <div className="windowLogin">
         <div className="windowHeader">
           <p>account / login</p>
           <a href="https://google.com/"> </a>
@@ -217,15 +102,15 @@ function LoginScreen({onSignUpClick}) {
         <div className="windowArea">
           <div className="section">
             <p>Email</p>
-            <input type="email" id="email" name="email" placeholder="email" minLength="3" maxLength="256"/>
+            <input type="email" id="email" name="email" placeholder="email" minLength="3" maxLength="256" onChange={handleChangeValue} />
           </div>
           <div className="section">
             <p>Password</p>
-            <input type="password" id="password" name="password" placeholder="password" minLength="6" maxLength="256"/>
+            <input type="password" id="password" name="password" placeholder="password" minLength="6" maxLength="256" onChange={handleChangeValue} />
           </div>
         </div>
         <div className="buttonsContainer">
-          <button className="login"><p>Login</p></button>
+          <button onClick={handleLogin} className="login"><p>Login</p></button>
           <button onClick={onSignUpClick}><p>Sign Up</p></button>
         </div>
       </div>
@@ -233,16 +118,25 @@ function LoginScreen({onSignUpClick}) {
   );
 }
 
-function EnterAccount() {
+function EnterAccount({ action }) {
   const [renderLogin, setRenderLogin] = useState(true);
+  const navigator = useNavigate();
+
+  useEffect(() => {
+    if (action == "login") {
+      setRenderLogin(true);
+    } if (action == "signup") {
+      setRenderLogin(false);
+    }
+  }, [action]);
 
   function handleChange() {
     if (renderLogin) {
       setRenderLogin(false);
-      console.log("Render is changed to: 'SignUp'")
+      navigator("/signup");
     } else {
       setRenderLogin(true);
-      console.log("Render is changed to: 'Login'")
+      navigator("/login");
     }
   }
 

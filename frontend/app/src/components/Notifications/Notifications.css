@@ -4,7 +4,7 @@
   --notif-red-color: #E75D5D;
 }
 
-.NotificationContainer {
+.notificationContainer {
   width: 100px;
   position: fixed;
   right: 0;
@@ -12,7 +12,7 @@
   z-index: 999;
 }
 
-.Notification {
+.notification {
   height: 68px;
   min-width: 125px;
   width: max-content;
@@ -23,22 +23,22 @@
   background: #FFF;
   filter: drop-shadow(1.56px 1.56px 0px #000);
   float: right;
-  animation: notification-show 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  animation: notification-show 5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.Notification > p {
+.notification > p {
   padding-left: 10px;
   padding-right: 10px;
   padding-bottom: 10px;
   font-size: 1.15rem
 }
 
-.NotificationHeader {
+.notificationHeader {
   display: flex;
   height: 40px;
 }
 
-.NotificationHeader > div {
+.notificationHeader > div {
   height: 15px;
   width: 15px;
   margin-top: 8px;
@@ -47,7 +47,7 @@
   border-radius: 100%;
 }
 
-.NotificationHeader > button {
+.notificationHeader > button {
   height: 20px;
   width: 20px;
   margin-left: auto;
@@ -58,19 +58,19 @@
   background: none;
 }
 
-.NotificationStatusGreen {
+.notificationStatusGreen {
   background-color: var(--notif-green-color);
 }
 
-.NotificationStatusYellow {
+.notificationStatusYellow {
   background-color: var(--notif-yellow-color);
 }
 
-.NotificationStatusRed {
+.notificationStatusRed {
   background-color: var(--notif-red-color);
 }
 
-.NotificationHeader > button:hover {
+.notificationHeader > button:hover {
   background-color: black;
 }
 
@@ -79,8 +79,16 @@
     margin-right: -230px;
     opacity: 0;
   }
-  100% {
+  10% {
     margin-right: 10px;
     opacity: 1;
+  }
+  90% {
+    margin-right: 10px;
+    opacity: 1;
+  }
+  100% {
+    margin-right: -230px;
+    opacity: 0;
   }
 }

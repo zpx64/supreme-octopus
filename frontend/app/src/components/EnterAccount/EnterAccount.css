@@ -21,7 +21,7 @@ label {
   user-select: none;
 }
 
-.windowL {
+.windowLogin {
   height: max-content;
   width: 615px;
   position: relative;
@@ -35,7 +35,7 @@ label {
   filter: drop-shadow(2.3999998569488525px 2.3999998569488525px 0px #000);
 }
 
-.windowS {
+.windowSignUp {
   height: max-content;
   width: 615px;
   position: relative;
