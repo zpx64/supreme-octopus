@@ -9,10 +9,10 @@ const setTokens = (accessToken, refreshToken) => {
 }
 
 const removeTokens = (token) => {
-  if (token == access_token_name) {
+  if (token === access_token_name) {
     Cookies.remove(access_token_name);
   }
-  if (token == refresh_token_name) {
+  if (token === refresh_token_name) {
     Cookies.remove(refresh_token_name);
   }
 }
@@ -42,7 +42,7 @@ const fetchTokens = async () => {
 
     const data = await response.json();
 
-    if (data[1] == "null") {
+    if (data[1] === "null") {
       setTokens(data[0], data[2]);
     } else {
       console.log("Error on tokenFetch");

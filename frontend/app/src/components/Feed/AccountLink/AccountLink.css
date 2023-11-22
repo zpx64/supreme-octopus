@@ -1,0 +1,22 @@
+.accountIconWrapper {
+  display: flex;
+  height: 100px;
+  width: 100px;
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+.accountIconWrapper > div {
+  display: flex;
+  height: 65px;
+  width: 65px;
+  margin: auto;
+  border-radius: 100%;
+  border: 2.75px solid #000;
+  box-shadow: 2.4px 2.4px 0px 0px #000;
+}
+
+.accountIconWrapper > div > img {
+  margin: auto;
+}

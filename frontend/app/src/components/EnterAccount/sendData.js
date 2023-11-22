@@ -14,11 +14,11 @@ function returnValidationScheme(action) {
                 .required(),
 
       email: Joi.string()
-             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-             .min(5)
-             .max(256)
+                .email({ tlds: { allow: false } })
+                .min(5)
+                .max(256)
                 .label('Email')
-             .required(),
+                .required(),
 
       password: Joi.string()
                 .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
@@ -37,11 +37,11 @@ function returnValidationScheme(action) {
                 .required(),
 
       email: Joi.string()
-             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-             .min(5)
-             .max(256)
+                .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+                .min(5)
+                .max(256)
                 .label('Email')
-             .required(),
+                .required(),
 
       password: Joi.string()
                 .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
@@ -67,11 +67,11 @@ function returnValidationScheme(action) {
   } else if (action === "Login") {
     return Joi.object({
       email: Joi.string()
-             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-             .min(5)
-             .max(256)
-              .label('Email')
-             .required(),
+                .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+                .min(5)
+                .max(256)
+                .label('Email')
+                .required(),
 
       password: Joi.string()
                 .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))

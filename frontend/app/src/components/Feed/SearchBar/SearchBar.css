@@ -1,0 +1,34 @@
+:root {
+  --feed-search-bar-padding: 10px;
+}
+
+.feedSearchBarContainer {
+  height: 45px;
+  width: 100%;
+  position: fixed;
+  margin: 26.6px auto 0 auto;
+  top: 0;
+}
+
+.feedSearchBar {
+  height: 45px;
+  width: 512px;
+  margin: auto;
+  border-radius: 12px;
+}
+
+.feedSearchBar > input {
+  height: calc(45px - calc(calc(var(--feed-search-bar-padding) * 2) + 5px));
+  width: calc(100% - calc(calc(var(--feed-search-bar-padding) * 2) + 5px));
+  padding: var(--feed-search-bar-padding);
+  border: 2.4px solid #000;
+  outline: none;
+  box-shadow: 2.4px 2.4px 0px 0px #000;
+  border-radius: 12px;
+  font-size: 14.4px;
+}
+
+.feedSearchBar > input::placeholder {
+   text-align: center; 
+}
+

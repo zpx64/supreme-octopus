@@ -4,10 +4,6 @@
   --input-enteraccount-padding: 10px;
 }
 
-#root {
-  height: 100vh;
-}
-
 p {
   margin: 0;
   user-select: none;
@@ -19,6 +15,10 @@ button {
 
 label {
   user-select: none;
+}
+
+.enterAccountWindowContainer {
+  height: 100vh;
 }
 
 .windowLogin {

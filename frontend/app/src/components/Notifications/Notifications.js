@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import gsap from 'gsap';
 import notificationStore from './NotificationsStore';
 import './Notifications.css'
 
