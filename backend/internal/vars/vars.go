@@ -25,11 +25,15 @@ var (
 	ErrIncorrectFilterKey                  = errors.New("13: Invalid filter key.")
 	ErrOnValidation                        = errors.New("14: Validation error: ") // need to be wrapped
 	ErrEmailNotFound                       = errors.New("15: Email not found.")
+
+	// TODO: rename T to Token
 	ErrAuthAccessTNotExpired               = errors.New("16: Access token is not expired.")
 	ErrAuthRefreshTExpired                 = errors.New("17: Refresh token is expired.")
 	ErrAuthRefreshTNotFound                = errors.New("18: Refresh token doesnt found.")
 	ErrAuthAccessTNotFound                 = errors.New("19: Access token doesnt found.")
 	ErrAuthAccessTExpired                  = errors.New("20: Access token expired.")
+	// *======================*
+
 	ErrAuthDeviceIdLenIsBiggerThanExpected = errors.New("21: Device id len is bigger than expected.")
 	ErrWithAuthInternal                    = errors.New("22: Internal Auth error.")
 	ErrIncorrectUintValue                  = errors.New("23: Incorrect uint value.")

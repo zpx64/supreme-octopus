@@ -41,7 +41,6 @@ type Output struct {
 	Status       int    `json:"-"`
 }
 
-// TODO: incorrect error on empty json parsing
 func Start(n string, log *zerolog.Logger) error {
 	var err error
 
@@ -61,7 +60,7 @@ func Start(n string, log *zerolog.Logger) error {
 		return err
 	}
 
-	err = auth.Init(context.Background())
+	err = auth.Init(context.Background(), logger)
 	if err != nil {
 		logger.Error().
 			Err(err).
@@ -75,7 +74,7 @@ func Start(n string, log *zerolog.Logger) error {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+	//defer r.Body.Close()
 
 	log := hlog.FromRequest(r)
 	log.Info().Msg("connected")
@@ -167,8 +166,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accessToken, refreshToken, err := auth.GenTokensPair(
-		credentials.Id,
+		ctx,
+		credentials.UserId,
 		deviceIdHash,
+		r.UserAgent(),
 	)
 	if err != nil {
 		log.Warn().

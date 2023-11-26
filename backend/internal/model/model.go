@@ -10,7 +10,7 @@ type UserNCred struct {
 }
 
 type User struct {
-	Id           int       `json:"id"`
+	UserId       int       `json:"user_id"`
 	CreationDate time.Time `json:"creation_date"`
 	Nickname     string    `json:"nickname"`
 	Name         *string   `json:"name,omitempty"`
@@ -18,7 +18,7 @@ type User struct {
 }
 
 type UserCredentials struct {
-	Id       int    `json:"-"`
+	UserId   int    `json:"user_id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Pow      string `json:"pow"`
@@ -27,8 +27,10 @@ type UserCredentials struct {
 }
 
 type UserToken struct {
-	Id           int    `json:"-"`
+	TokenId      int    `json:"token_id"`
+	UserId       int    `json:"user_id"`
 	DeviceId     string `json:"device_id"`
 	RefreshToken string `json:"refresh_token"`
+	UserAgent    string `json:"user_agent"`
 	TokenDate    int64  `json:"token_date"`
 }

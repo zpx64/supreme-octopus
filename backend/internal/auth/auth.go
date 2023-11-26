@@ -8,32 +8,39 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ssleert/mumap"
+	"github.com/rs/zerolog"
 )
 
-type token struct {
-	date     int64
-	id       int
-	deviceId uint64
+type refreshToken struct {
+	dbId int
+	date int64
 }
 
 type tokenMaps struct {
-	accessTokens  mumap.Map[uint64, token]
-	refreshTokens mumap.Map[string, token]
+	accessTokens  mumap.Map[uint64, int64]
+	refreshTokens mumap.Map[string, refreshToken]
 }
 
 var (
+	inited bool
+	logger zerolog.Logger
 	dbConnPool *pgxpool.Pool
 
 	tokens = tokenMaps{
-		accessTokens:  mumap.New[uint64, token](vars.DefaultMapSize),
-		refreshTokens: mumap.New[string, token](vars.DefaultMapSize),
+		accessTokens:  mumap.New[uint64, int64](vars.DefaultMapSize),
+		refreshTokens: mumap.New[string, refreshToken](vars.DefaultMapSize),
 	}
 )
 
 // i dont really understand why we need context here
-func Init(ctx context.Context) error {
-	var err error
+func Init(ctx context.Context, log zerolog.Logger) error {
+	if inited {
+		return nil
+	}
 
+	logger = log
+	
+	var err error
 	dbConnPool, err = pgxpool.New(
 		ctx, db.GetConnString(),
 	)
@@ -41,5 +48,6 @@ func Init(ctx context.Context) error {
 		return err
 	}
 
+	inited = true
 	return nil
 }

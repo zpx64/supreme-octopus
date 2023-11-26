@@ -6,8 +6,8 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/model"
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func IsUserExist(
@@ -114,9 +114,60 @@ func GetCredentialsByEmail(
 	}
 
 	return model.UserCredentials{
-		Id:       credentials_id,
+		UserId:   credentials_id,
 		Email:    credentials_email,
 		Password: credentials_password,
 		Pow:      credentials_pow,
 	}, nil
+}
+
+func InsertNewToken(
+	ctx    context.Context,
+	conn   *pgxpool.Conn,
+	token  model.UserToken,
+) (int, error) {
+	var (
+		id int
+	)
+	err := conn.QueryRow(ctx,
+		`INSERT INTO users_tokens (
+		   user_id, device_id, 
+			 refresh_token, user_agent, 
+			 token_date
+		 )
+		 VALUES ($1, $2, $3, $4, $5)
+		 RETURNING token_id`,
+		token.UserId, token.DeviceId, 
+		token.RefreshToken, token.UserAgent,
+		token.TokenDate,
+	).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func UpdateToken(
+	ctx    context.Context,
+	conn   *pgxpool.Conn,
+	token  model.UserToken,
+) error {
+	cmdTag, err := conn.Exec(ctx,
+		`UPDATE users_tokens
+		 SET refresh_token = $2,
+		     token_date = $3
+		 WHERE token_id = $1`,
+		token.TokenId,
+		token.RefreshToken,
+		token.TokenDate,
+	)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() != 1 {
+		return vars.ErrNotInDb
+	}
+
+	return nil
 }

@@ -56,7 +56,7 @@ func Start(n string, log *zerolog.Logger) error {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+	//defer r.Body.Close()
 
 	log := hlog.FromRequest(r)
 	log.Info().Msg("connected")

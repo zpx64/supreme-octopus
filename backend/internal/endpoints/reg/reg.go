@@ -28,6 +28,7 @@ var (
 	dbConn *pgxpool.Pool
 )
 
+// TODO: add validation for only ENGLISH alphabet in fields
 type Input struct {
 	Nickname string  `json:"nickname"           validate:"required,min=3,max=256"`
 	Name     *string `json:"name,omitempty"`
@@ -42,7 +43,6 @@ type Output struct {
 	Status   int    `json:"-"`
 }
 
-// TODO: incorrect error on empty json parsing
 func Start(n string, log *zerolog.Logger) error {
 	var err error
 
@@ -67,7 +67,7 @@ func Start(n string, log *zerolog.Logger) error {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+	//defer r.Body.Close()
 
 	log := hlog.FromRequest(r)
 	log.Info().Msg("connected")
@@ -98,7 +98,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: rewrite with normal validation
 	if in.Name != nil || in.Surname != nil {
-		if in.Name == nil {	
+		if in.Name == nil {
 			log.Warn().Err(err).Msg("validation error")
 
 			out.Err = errors.Join(
@@ -109,7 +109,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if in.Surname == nil {	
+		if in.Surname == nil {
 			log.Warn().Err(err).Msg("validation error")
 
 			out.Err = errors.Join(

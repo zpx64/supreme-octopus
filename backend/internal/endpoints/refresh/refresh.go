@@ -2,6 +2,7 @@ package refresh
 
 import (
 	"context"
+	"time"
 	"net/http"
 	"strconv"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/db"
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
-
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
@@ -37,7 +37,6 @@ type Output struct {
 	Status       int    `json:"-"`
 }
 
-// TODO: incorrect error on empty json parsing
 func Start(n string, log *zerolog.Logger) error {
 	var err error
 
@@ -57,7 +56,7 @@ func Start(n string, log *zerolog.Logger) error {
 		return err
 	}
 
-	err = auth.Init(context.Background())
+	err = auth.Init(context.Background(), logger)
 	if err != nil {
 		logger.Error().
 			Err(err).
@@ -71,7 +70,7 @@ func Start(n string, log *zerolog.Logger) error {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+	//defer r.Body.Close()
 
 	log := hlog.FromRequest(r)
 	log.Info().Msg("connected")
@@ -99,19 +98,27 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		out.Status = http.StatusInternalServerError
 		return
 	}
-	
+
 	accessTokenUint, err := strconv.ParseUint(in.AccessToken, 10, 64)
 	if err != nil {
 		log.Warn().Err(err).Msg("unsigned integer conversion error")
-		
+
 		out.Err = vars.ErrIncorrectUintValue.Error()
 		out.Status = http.StatusInternalServerError
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(
+		r.Context(),
+		time.Duration(vars.TimeoutSeconds)*time.Second,
+	)
+	defer cancel()
+
 	accessToken, refreshToken, err := auth.RegenTokensPair(
+		ctx,
 		accessTokenUint,
 		in.RefreshToken,
+		r.UserAgent(),
 	)
 	if err != nil {
 		log.Warn().Err(err).Msg("error with tokens regeneration")
