@@ -4,13 +4,12 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:1.25.0
+    build:
+      context: ../
+      dockerfile: ./infra/containers/nginx_with_static_data.Dockerfile
     ports:
       - 443:443
       - 80:80
-    volumes:
-      - ./static:/static:ro
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       - private
     depends_on:

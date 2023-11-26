@@ -40,6 +40,7 @@ var (
 
 	// values from env
 	HttpPort                = env.GetDefault("HTTP_PORT", "9876")
+	HttpDomainName          = env.GetDefault("HTTP_DOMAIN_NAME", "http://localhost")
 	TimeoutSeconds          = env.GetIntDefault("TIMEOUT_SECONDS", 30)
 	ReadTimeoutSeconds      = env.GetIntDefault("READ_TIMEOUT_SECONDS", 60)
 	WriteTimeoutSeconds     = env.GetIntDefault("WRITE_TIMEOUT_SECONDS", 80)
