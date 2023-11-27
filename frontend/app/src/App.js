@@ -20,7 +20,6 @@ function Page() {
       path: "/login",
       element:
       <>
-        <Notifications />
         <EnterAccount action="login" />
         <Background />
       </>
@@ -29,7 +28,6 @@ function Page() {
       path: "/signup",
       element:
       <>
-        <Notifications />
         <EnterAccount action="signup" />
         <Background />
       </>
@@ -38,6 +36,7 @@ function Page() {
     
   return (
     <>
+      <Notifications />
       <RouterProvider router={router} />
     </>
   );

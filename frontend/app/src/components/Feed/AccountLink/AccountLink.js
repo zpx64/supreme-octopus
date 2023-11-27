@@ -1,4 +1,3 @@
-import React from 'react';
 import User from './assets/img/User.svg';
 
 import './AccountLink.css'

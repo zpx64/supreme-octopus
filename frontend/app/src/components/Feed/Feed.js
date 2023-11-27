@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTokens } from '../TokensManagment/TokensManagment';
 
@@ -21,7 +21,7 @@ function Feed() {
     <>
       <AccountLink />
       <SearchBar />
-      <Posts />
+      <Scrollbar />
       <p style={{width: "100%", position: "absolute", top: "49%", textAlign: "center"}}>It's Your Feed.</p>
       <p style={{width: "100%", position: "absolute", top: "51%", textAlign: "center"}}>Enjoy this label.</p>
     </>

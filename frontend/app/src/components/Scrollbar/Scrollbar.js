@@ -1,10 +1,12 @@
-import React from 'react';
-import './Scrollbar.css';
-
-function Scrollbar(className) {
+// TODO: Write scrollbar bc i dunno how to do it correctly
+function Scrollbar() {
   return (
     <>
-      <div className="scrollbarActivationArea"></div>
+      <div className="scrollbar-wrapper">
+        <div>
+          
+        </div>
+      </div>
     </>
   )
 }
