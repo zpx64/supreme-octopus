@@ -16,6 +16,7 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/endpoints/login"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/refresh"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/reg"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/postNew"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/test"
 
 	"github.com/justinas/alice"
@@ -36,6 +37,7 @@ var (
 		{"/reg", reg.Start, reg.Handler, reg.Stop},
 		{"/login", login.Start, login.Handler, login.Stop},
 		{"/refresh", refresh.Start, refresh.Handler, refresh.Stop},
+		{"/post_new", postNew.Start, postNew.Handler, postNew.Stop},
 	}
 	logger zerolog.Logger
 )

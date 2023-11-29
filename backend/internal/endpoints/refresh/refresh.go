@@ -56,6 +56,7 @@ func Start(n string, log *zerolog.Logger) error {
 		return err
 	}
 
+	logger.Trace().Msg("initing auth")
 	err = auth.Init(context.Background(), logger)
 	if err != nil {
 		logger.Error().

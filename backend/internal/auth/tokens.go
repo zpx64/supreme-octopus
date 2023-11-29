@@ -24,17 +24,28 @@ func HashDeviceId(deviceId string) (uint64, error) {
 }
 
 // check is access token correct and not expired
-func ValidateAccessToken(tkn uint64) (bool, error) {
-	timeNow := time.Now().Unix()
-
-	tokenDate, ok := tokens.accessTokens.Get(tkn)
+func ValidateAccessToken(tkn uint64) error {
+	token, ok := tokens.accessTokens.Get(tkn)
 	if !ok {
-		return false, vars.ErrAuthAccessTNotFound
+		return vars.ErrAuthAccessTNotFound
 	}
-	if timeNow-tokenDate >= vars.AccessTokenLifeSeconds {
-		return false, vars.ErrAuthAccessTExpired
+
+	timeNow := time.Now().Unix()
+	if timeNow-token.date >= vars.AccessTokenLifeSeconds {
+		return vars.ErrAuthAccessTExpired
 	}
-	return true, nil
+	return nil
+}
+
+func GetUserIdByAccessToken(tkn uint64) (int, error) {
+	err := ValidateAccessToken(tkn)
+	if err != nil {
+		return 0, err
+	}
+	
+	token, _ := tokens.accessTokens.Get(tkn)
+
+	return token.userId, nil
 }
 
 func GetTokens() (uint64, string, error) {	
@@ -86,7 +97,12 @@ func GenTokensPair(
 		return 0, "", vars.ErrWithDb
 	}
 
-	tokens.accessTokens.Set(hash, timeNow)
+	tokens.accessTokens.Set(hash, 
+		accessToken{
+			userId: id,
+			date: timeNow,
+		},
+	)
 	tokens.refreshTokens.Set(uid, 
 		refreshToken{
 			dbId: tokenId,
@@ -109,9 +125,9 @@ func RegenTokensPair(
 ) (uint64, string, error) {
 	timeNow := time.Now().Unix()
 
-	tokenDate, ok := tokens.accessTokens.Get(access)
+	token, ok := tokens.accessTokens.Get(access)
 	if ok {
-		if timeNow-tokenDate < vars.AccessTokenLifeSeconds {
+		if timeNow-token.date < vars.AccessTokenLifeSeconds {
 			//println("skipped by your mommy)")
 			return 0, "", vars.ErrAuthAccessTNotExpired
 		}
@@ -155,7 +171,12 @@ func RegenTokensPair(
 		return 0, "", vars.ErrWithDb
 	}
 
-	tokens.accessTokens.Set(hash, timeNow)
+	tokens.accessTokens.Set(hash, 
+		accessToken{
+			userId: token.userId,
+			date: timeNow,
+		},	
+	)
 	tokens.refreshTokens.Set(uid, 
 		refreshToken{
 			dbId: t.dbId,

@@ -1,5 +1,7 @@
 package db
 
+// TODO: split in separate files
+
 import (
 	"context"
 
@@ -17,7 +19,7 @@ func IsUserExist(
 ) (bool, error) {
 	exists := [2]bool{}
 
-	rows, err := conn.Query(context.TODO(),
+	rows, err := conn.Query(ctx,
 		`SELECT EXISTS(SELECT 1 FROM users
 		 WHERE nickname = $1)
 		 UNION
@@ -170,4 +172,31 @@ func UpdateToken(
 	}
 
 	return nil
+}
+
+func InsertNewPost(
+	ctx  context.Context,
+	conn *pgxpool.Conn,
+	post model.UserPost,
+) (int, error) {
+	var (
+		id int
+	)
+	err := conn.QueryRow(ctx,
+		`INSERT INTO users_posts (
+		   user_id, creation_date, 
+			 post_type, body, votes_amount,
+			 comments_amount
+		 )
+		 VALUES ($1, $2, $3, $4, $5, $6)
+		 RETURNING post_id`,
+		 post.UserId, post.CreationDate,
+		 post.PostType, post.Body, post.VotesAmount,
+		 post.CommentsAmount,
+	).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

@@ -15,7 +15,6 @@ services:
     depends_on:
       - backend
     restart: always
-
     security_opt:
        - label:disable
 

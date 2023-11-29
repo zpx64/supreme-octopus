@@ -1,18 +1,16 @@
-package login
+package postNew
 
 import (
 	"context"
-	"net/http"
 	"strconv"
+	"net/http"
 	"time"
 
-	"github.com/zpx64/supreme-octopus/internal/auth"
 	"github.com/zpx64/supreme-octopus/internal/db"
 	"github.com/zpx64/supreme-octopus/internal/model"
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
-
-	"github.com/zpx64/supreme-octopus/pkg/valid"
+	"github.com/zpx64/supreme-octopus/internal/auth"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
@@ -28,17 +26,17 @@ var (
 	dbConn *pgxpool.Pool
 )
 
+// TODO: add validation for only ENGLISH alphabet in fields
 type Input struct {
-	Email    string `json:"email"     validate:"required,min=3,max=256"`
-	Password string `json:"password"  validate:"required,min=6,max=256"`
-	DeviceId string `json:"device_id" validate:"required,min=6"`
+	AccessToken  string     `json:"access_token"  validate:"required,max=256"`
+	PostType     model.Post `json:"post_type"     validate="required"` 
+	Body         string     `json:"body"          validate="required,min=5"`
 }
 
 type Output struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	Err          string `json:"error"`
-	Status       int    `json:"-"`
+	PostId   int    `json:"post_id"`
+	Err      string `json:"error"`
+	Status   int    `json:"-"`
 }
 
 func Start(n string, log *zerolog.Logger) error {
@@ -59,7 +57,7 @@ func Start(n string, log *zerolog.Logger) error {
 
 		return err
 	}
-
+	
 	logger.Trace().Msg("initing auth")
 	err = auth.Init(context.Background(), logger)
 	if err != nil {
@@ -104,13 +102,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !valid.IsEmail(in.Email) {
-		log.Warn().
-			Str("email", in.Email).
-			Msg("email is incorrect")
+	accessTokenUint, err := strconv.ParseUint(in.AccessToken, 10, 64)
+	if err != nil {	
+		log.Warn().Err(err).Msg("unsigned integer conversion error")
 
-		out.Err = vars.ErrEmailIncorrect.Error()
-		out.Status = http.StatusUnprocessableEntity
+		out.Err = vars.ErrIncorrectUintValue.Error()
+		out.Status = http.StatusInternalServerError
+		return
+	}
+
+	userId, err := auth.GetUserIdByAccessToken(accessTokenUint)
+	if err != nil {	
+		log.Warn().Err(err).Msg("unsigned integer conversion error")
+
+		out.Err = err.Error()
+		out.Status = http.StatusInternalServerError
 		return
 	}
 
@@ -121,11 +127,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var (
-		credentials model.UserCredentials
+		id int
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
-			credentials, err = db.GetCredentialsByEmail(ctx, c, in.Email)
+			id, err = db.InsertNewPost(ctx, c, 
+				model.UserPost{
+					UserId: userId,
+					CreationDate: time.Now(),
+					PostType: in.PostType,
+					Body: in.Body,
+				},
+			)
 			return err
 		},
 	)
@@ -134,60 +147,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Err(err).
 			Msg("an error with database")
 
-		if err == vars.ErrNotInDb {
-			out.Err = err.Error()
-		} else {
-			out.Err = vars.ErrWithDb.Error()
-		}
+		out.Err = vars.ErrWithDb.Error()
 		out.Status = http.StatusInternalServerError
 		return
 	}
 
-	passwordCorrect := (credentials.Password == utils.HashPassWithPows(
-		in.Password, credentials.Pow,
-	))
-	if !passwordCorrect {
-		log.Warn().
-			Msg("user password is incorrect")
-
-		out.Err = vars.ErrPassIncorrect.Error()
-		out.Status = http.StatusForbidden
-		return
-	}
-
-	deviceIdHash, err := auth.HashDeviceId(in.DeviceId)
-	if err != nil {
-		log.Warn().
-			Err(err).
-			Msg("cant hash device id")
-
-		out.Err = err.Error()
-		out.Status = http.StatusUnprocessableEntity
-		return
-	}
-
-	accessToken, refreshToken, err := auth.GenTokensPair(
-		ctx,
-		credentials.UserId,
-		deviceIdHash,
-		r.UserAgent(),
-	)
-	if err != nil {
-		log.Warn().
-			Err(err).
-			Msg("cant generate new tokens pair")
-
-		out.Err = err.Error()
-		out.Status = http.StatusInternalServerError
-		return
-	}
-
-	out.AccessToken = strconv.FormatUint(accessToken, 10)
-	out.RefreshToken = refreshToken
+	out.PostId = id
 
 	log.Debug().
 		Interface("input_json", in).
-		Interface("credentials", credentials).
 		Interface("output_json", out).
 		Send()
 }

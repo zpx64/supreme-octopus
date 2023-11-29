@@ -16,8 +16,13 @@ type refreshToken struct {
 	date int64
 }
 
+type accessToken struct {
+	userId int
+	date   int64
+}
+
 type tokenMaps struct {
-	accessTokens  mumap.Map[uint64, int64]
+	accessTokens  mumap.Map[uint64, accessToken]
 	refreshTokens mumap.Map[string, refreshToken]
 }
 
@@ -27,7 +32,7 @@ var (
 	dbConnPool *pgxpool.Pool
 
 	tokens = tokenMaps{
-		accessTokens:  mumap.New[uint64, int64](vars.DefaultMapSize),
+		accessTokens:  mumap.New[uint64, accessToken](vars.DefaultMapSize),
 		refreshTokens: mumap.New[string, refreshToken](vars.DefaultMapSize),
 	}
 )

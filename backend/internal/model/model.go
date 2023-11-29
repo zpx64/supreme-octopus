@@ -4,6 +4,12 @@ import (
 	"time"
 )
 
+type Post int
+const (
+	PostArticle Post = 1
+	PostThought
+)
+
 type UserNCred struct {
 	User        User            `json:"user"`
 	Credentials UserCredentials `json:"credentials"`
@@ -34,3 +40,14 @@ type UserToken struct {
 	UserAgent    string `json:"user_agent"`
 	TokenDate    int64  `json:"token_date"`
 }
+
+type UserPost struct {
+	PostId         int       `json:"post_id"`
+	UserId         int       `json:"user_id"`
+	CreationDate   time.Time `json:"creation_date"`
+	PostType       Post      `json:"post_type"`
+	Body           string    `json:"body"`
+	VotesAmount    int       `json:"votes_amount"`
+	CommentsAmount int       `json:"comments_amount"`
+}
+
