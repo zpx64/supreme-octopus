@@ -10,9 +10,12 @@ require (
 	github.com/jackc/pgx/v5 v5.5.0
 	github.com/jackc/tern/v2 v2.1.1
 	github.com/justinas/alice v1.2.0
+	github.com/kolesa-team/go-webp v1.0.4
+	github.com/nofeaturesonlybugs/z85 v1.0.2
 	github.com/rs/zerolog v1.31.0
 	github.com/ssleert/limiter v0.0.0-20231020083702-71520a45140e
 	github.com/ssleert/mumap v0.0.0-20231117200924-48efe5cd5e86
+	golang.org/x/image v0.14.0
 )
 
 require (
@@ -32,6 +35,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/nofeaturesonlybugs/errors v1.1.1 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
@@ -41,5 +45,5 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )

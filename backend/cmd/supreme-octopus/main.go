@@ -13,11 +13,11 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
 	// endpoints
-	"github.com/zpx64/supreme-octopus/internal/endpoints/login"
-	"github.com/zpx64/supreme-octopus/internal/endpoints/refresh"
-	"github.com/zpx64/supreme-octopus/internal/endpoints/reg"
-	"github.com/zpx64/supreme-octopus/internal/endpoints/postNew"
-	"github.com/zpx64/supreme-octopus/internal/endpoints/test"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/login"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/postNew"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/refresh"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/reg"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/test"
 
 	"github.com/justinas/alice"
 	"github.com/rs/zerolog"
@@ -51,8 +51,11 @@ func main() {
 	if vars.LogStdout {
 		logFile = zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02 15:04:05"}
 	} else {
+		// TODO: test json logging to file
+		//       maybe port to something like logstash
+		//       but more lightweight and simple
 		logFile, err = os.OpenFile(
-			"./logs/"+time.Now().Format("2006_01_02-15:04:05")+".log",
+			vars.LogPath+"/backend_main"+time.Now().Format("2006_01_02-15:04:05")+".log",
 			os.O_APPEND|os.O_CREATE|os.O_WRONLY,
 			0666,
 		)
@@ -175,13 +178,15 @@ func start() {
 		logger.Info().Msgf("%s start called", e.name)
 		err := e.start(e.name, &logger)
 		if err != nil {
-			for j := 0; j <= i; j++ {
+			logger.Error().Err(err).Msg("an error on module init")
+			for j := 0; j < i; j++ {
 				logger.Info().Msgf("%s stop called", endPoints[j].name)
 				if err := endPoints[j].stop(); err != nil {
 					logger.Error().Err(err)
 				}
 			}
 			logger.Fatal().Err(err)
+			os.Exit(1)
 		}
 	}
 }

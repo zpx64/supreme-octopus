@@ -13,15 +13,15 @@ services:
     networks:
       - private
     depends_on:
-      - backend
+      - backend-main
     restart: always
     security_opt:
        - label:disable
 
-  backend:
+  backend-main:
     build:
-      context: ../backend/
-      dockerfile: ./build/Dockerfile
+      context: ../backend
+      dockerfile: ./build/supreme-octopus.dockerfile
     volumes:
       - ./logs:/app/logs
     networks:

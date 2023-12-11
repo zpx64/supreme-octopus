@@ -89,7 +89,7 @@ func ReadAllBody(log *zerolog.Logger, r *http.Request, body *[]byte) error {
 	var err error
 	log.Trace().Msg("reading body")
 
-	*body, err = io.ReadAll(r.Body)
+	_, err = io.ReadFull(r.Body, *body)
 	if err != nil {
 		log.Warn().
 			Err(err).
@@ -119,6 +119,50 @@ func UnmarshalJson[T any](
 		return vars.ErrInputJsonIsIncorrect
 	}
 	return nil
+}
+
+func BinaryEndPointPrerequisites(
+	log *zerolog.Logger,
+	r *http.Request,
+	limit *limiter.Limiter[string],
+	body *[]byte,
+) (int, error) {
+	err := LimitUserByRemoteAddr(log, r, limit)
+	if err != nil {
+		return http.StatusTooManyRequests, err
+	}
+
+	err = ReadAllBody(log, r, body)
+	if err != nil {
+		return http.StatusInsufficientStorage, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func EndPointPrerequisitesWithoutMaxBodyLen[T any](
+	log *zerolog.Logger,
+	w http.ResponseWriter,
+	r *http.Request,
+	limit *limiter.Limiter[string],
+	in *T,
+) (int, error) {
+	err := LimitUserByRemoteAddr(log, r, limit)
+	if err != nil {
+		return http.StatusTooManyRequests, err
+	}
+
+	err = UnmarshalJson(log, r.Body, in)
+	if err != nil {
+		return http.StatusUnprocessableEntity, err
+	}
+
+	err = ValidateStruct(log, in)
+	if err != nil {
+		return http.StatusUnprocessableEntity, err
+	}
+
+	return http.StatusOK, nil
 }
 
 func EndPointPrerequisites[T any](

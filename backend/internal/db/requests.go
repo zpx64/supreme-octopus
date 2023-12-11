@@ -124,9 +124,9 @@ func GetCredentialsByEmail(
 }
 
 func InsertNewToken(
-	ctx    context.Context,
-	conn   *pgxpool.Conn,
-	token  model.UserToken,
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	token model.UserToken,
 ) (int, error) {
 	var (
 		id int
@@ -139,7 +139,7 @@ func InsertNewToken(
 		 )
 		 VALUES ($1, $2, $3, $4, $5)
 		 RETURNING token_id`,
-		token.UserId, token.DeviceId, 
+		token.UserId, token.DeviceId,
 		token.RefreshToken, token.UserAgent,
 		token.TokenDate,
 	).Scan(&id)
@@ -150,10 +150,11 @@ func InsertNewToken(
 	return id, nil
 }
 
+// TODO: rewrite with pass by pointer model.UserToken
 func UpdateToken(
-	ctx    context.Context,
-	conn   *pgxpool.Conn,
-	token  model.UserToken,
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	token model.UserToken,
 ) error {
 	cmdTag, err := conn.Exec(ctx,
 		`UPDATE users_tokens
@@ -174,8 +175,9 @@ func UpdateToken(
 	return nil
 }
 
+// TODO: rewrite with pass by pointer model.UserPost
 func InsertNewPost(
-	ctx  context.Context,
+	ctx context.Context,
 	conn *pgxpool.Conn,
 	post model.UserPost,
 ) (int, error) {
@@ -190,9 +192,9 @@ func InsertNewPost(
 		 )
 		 VALUES ($1, $2, $3, $4, $5, $6)
 		 RETURNING post_id`,
-		 post.UserId, post.CreationDate,
-		 post.PostType, post.Body, post.VotesAmount,
-		 post.CommentsAmount,
+		post.UserId, post.CreationDate,
+		post.PostType, post.Body, post.VotesAmount,
+		post.CommentsAmount,
 	).Scan(&id)
 	if err != nil {
 		return 0, err

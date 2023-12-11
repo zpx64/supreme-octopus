@@ -7,8 +7,8 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ssleert/mumap"
 	"github.com/rs/zerolog"
+	"github.com/ssleert/mumap"
 )
 
 type refreshToken struct {
@@ -27,8 +27,8 @@ type tokenMaps struct {
 }
 
 var (
-	inited bool
-	logger zerolog.Logger
+	inited     bool
+	logger     zerolog.Logger
 	dbConnPool *pgxpool.Pool
 
 	tokens = tokenMaps{
@@ -44,7 +44,7 @@ func Init(ctx context.Context, log zerolog.Logger) error {
 	}
 
 	logger = log
-	
+
 	var err error
 	dbConnPool, err = pgxpool.New(
 		ctx, db.GetConnString(),

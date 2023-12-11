@@ -5,6 +5,7 @@ import (
 )
 
 type Post int
+
 const (
 	PostArticle Post = 1
 	PostThought
@@ -50,4 +51,3 @@ type UserPost struct {
 	VotesAmount    int       `json:"votes_amount"`
 	CommentsAmount int       `json:"comments_amount"`
 }
-

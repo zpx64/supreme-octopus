@@ -2,12 +2,12 @@ package auth
 
 import (
 	"context"
-	"time"
 	"strconv"
+	"time"
 
-	"github.com/zpx64/supreme-octopus/internal/vars"
 	"github.com/zpx64/supreme-octopus/internal/db"
 	"github.com/zpx64/supreme-octopus/internal/model"
+	"github.com/zpx64/supreme-octopus/internal/vars"
 	"github.com/zpx64/supreme-octopus/pkg/cryptograph"
 
 	"github.com/cespare/xxhash"
@@ -42,13 +42,13 @@ func GetUserIdByAccessToken(tkn uint64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	
+
 	token, _ := tokens.accessTokens.Get(tkn)
 
 	return token.userId, nil
 }
 
-func GetTokens() (uint64, string, error) {	
+func GetTokens() (uint64, string, error) {
 	hash, err := cryptograph.GenRandHash() // access token
 	if err != nil {
 		return 0, "", err
@@ -82,11 +82,11 @@ func GenTokensPair(
 			var err error
 			tokenId, err = db.InsertNewToken(
 				ctx, c, model.UserToken{
-					UserId: id,
-					DeviceId: strconv.FormatUint(deviceId, 10),
+					UserId:       id,
+					DeviceId:     strconv.FormatUint(deviceId, 10),
 					RefreshToken: uid,
-					UserAgent: userAgent,
-					TokenDate: timeNow,
+					UserAgent:    userAgent,
+					TokenDate:    timeNow,
 				},
 			)
 			return err
@@ -97,13 +97,13 @@ func GenTokensPair(
 		return 0, "", vars.ErrWithDb
 	}
 
-	tokens.accessTokens.Set(hash, 
+	tokens.accessTokens.Set(hash,
 		accessToken{
 			userId: id,
-			date: timeNow,
+			date:   timeNow,
 		},
 	)
-	tokens.refreshTokens.Set(uid, 
+	tokens.refreshTokens.Set(uid,
 		refreshToken{
 			dbId: tokenId,
 			date: timeNow,
@@ -154,9 +154,9 @@ func RegenTokensPair(
 		func(c *pgxpool.Conn) error {
 			err := db.UpdateToken(
 				ctx, c, model.UserToken{
-					TokenId: t.dbId,
+					TokenId:      t.dbId,
 					RefreshToken: uid,
-					TokenDate: timeNow,
+					TokenDate:    timeNow,
 				},
 			)
 			return err
@@ -171,13 +171,13 @@ func RegenTokensPair(
 		return 0, "", vars.ErrWithDb
 	}
 
-	tokens.accessTokens.Set(hash, 
+	tokens.accessTokens.Set(hash,
 		accessToken{
 			userId: token.userId,
-			date: timeNow,
-		},	
+			date:   timeNow,
+		},
 	)
-	tokens.refreshTokens.Set(uid, 
+	tokens.refreshTokens.Set(uid,
 		refreshToken{
 			dbId: t.dbId,
 			date: timeNow,
