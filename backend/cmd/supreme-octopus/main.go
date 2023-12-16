@@ -14,8 +14,8 @@ import (
 
 	// endpoints
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/login"
-	"github.com/zpx64/supreme-octopus/internal/endpoints/main/postNew"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/postImage"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/postNew"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/refresh"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/reg"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/test"

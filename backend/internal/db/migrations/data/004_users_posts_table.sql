@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users_posts (
   creation_date   TIMESTAMPTZ NOT NULL,
   post_type       INTEGER     NOT NULL,
   body            TEXT        NOT NULL, -- https://stackoverflow.com/questions/7310558/postgresql-big-text-column-performance
+  attachments     TEXT[]      NOT NULL,
   votes_amount    INTEGER     NOT NULL,
   comments_amount INTEGER     NOT NULL
 );

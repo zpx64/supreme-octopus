@@ -48,6 +48,7 @@ type UserPost struct {
 	CreationDate   time.Time `json:"creation_date"`
 	PostType       Post      `json:"post_type"`
 	Body           string    `json:"body"`
+	Attachments    []string  `json:"attachments"`
 	VotesAmount    int       `json:"votes_amount"`
 	CommentsAmount int       `json:"comments_amount"`
 }

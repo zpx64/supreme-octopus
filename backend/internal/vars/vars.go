@@ -57,7 +57,7 @@ var (
 	LogPath                 = env.GetDefault("LOG_PATH", "./logs")
 	LogStdout               = env.GetBoolDefault("LOG_STDOUT", true)
 	DebugMode               = env.GetBoolDefault("DEBUG_MODE", true)
-	ImagesStoreUrl          = env.GetDefault("IMAGES_STORE_URL", "backend-images-store")	
+	ImagesStoreUrl          = env.GetDefault("IMAGES_STORE_URL", "backend-images-store")
 	PostgresUser            = env.GetDefault("POSTGRES_USER", "admin")
 	PostgresPassword        = env.GetDefault("POSTGRES_PASSWORD", "admin")
 	PostgresDbUrl           = env.GetDefault("POSTGRES_DB_URL", "postgres")

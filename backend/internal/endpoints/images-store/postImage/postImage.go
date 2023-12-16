@@ -69,7 +69,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	var err error
-	out.Status, err = 
+	out.Status, err =
 		utils.EndPointPrerequisitesWithoutLimiterAndMaxBodyLen(
 			log, w, r, &in,
 		)

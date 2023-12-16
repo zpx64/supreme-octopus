@@ -186,14 +186,14 @@ func InsertNewPost(
 	)
 	err := conn.QueryRow(ctx,
 		`INSERT INTO users_posts (
-		   user_id, creation_date, 
-			 post_type, body, votes_amount,
+		   user_id, creation_date, post_type, 
+			 body, attachments, votes_amount,
 			 comments_amount
 		 )
-		 VALUES ($1, $2, $3, $4, $5, $6)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
 		 RETURNING post_id`,
-		post.UserId, post.CreationDate,
-		post.PostType, post.Body, post.VotesAmount,
+		post.UserId, post.CreationDate, post.PostType, 
+		post.Body, post.Attachments, post.VotesAmount,
 		post.CommentsAmount,
 	).Scan(&id)
 	if err != nil {

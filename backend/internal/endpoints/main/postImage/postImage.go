@@ -1,17 +1,17 @@
 package postImage
 
 import (
-	"fmt"
-	"net/http"
-	"encoding/json"
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"strconv"
 
+	"github.com/zpx64/supreme-octopus/internal/auth"
 	"github.com/zpx64/supreme-octopus/internal/imagesStore"
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
-	"github.com/zpx64/supreme-octopus/internal/auth"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
@@ -85,7 +85,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	var err error
-	out.Status, err = 
+	out.Status, err =
 		utils.EndPointPrerequisitesWithoutMaxBodyLen(
 			log, w, r, limit, &in,
 		)
@@ -118,7 +118,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	microserviceInput := InputForImagesStore{
 		Images: in.Images,
 	}
-	
+
 	jsonBody, err := json.Marshal(microserviceInput)
 	if err != nil {
 		log.Warn().Err(err).Msg("error with json marshaling")
@@ -145,14 +145,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	//       on plain write to response
 	dec := json.NewDecoder(resp.Body)
 	err = dec.Decode(&out)
-	if err != nil {	
+	if err != nil {
 		log.Warn().Err(err).Msg("an error with json unmarshaling")
 
 		out.Err = vars.ErrInternalJsonParsing.Error()
 		out.Status = http.StatusInternalServerError
 		return
 	}
-	
+
 	log.Debug().
 		Interface("output_json", out).
 		Send()

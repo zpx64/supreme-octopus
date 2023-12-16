@@ -26,11 +26,12 @@ var (
 	dbConn *pgxpool.Pool
 )
 
-// TODO: add validation for only ENGLISH alphabet in fields
+// TODO: disable attachments in model.PostArticle
 type Input struct {
 	AccessToken string     `json:"access_token"  validate:"required,max=256"`
 	PostType    model.Post `json:"post_type"     validate="required"`
 	Body        string     `json:"body"          validate="required,min=5"`
+	Attachments []string   `json:"attachments"   validate="required,max=8"`
 }
 
 type Output struct {
@@ -137,6 +138,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 					CreationDate: time.Now(),
 					PostType:     in.PostType,
 					Body:         in.Body,
+					Attachments:  in.Attachments,
 				},
 			)
 			return err
