@@ -28,6 +28,22 @@ services:
       - private
     depends_on:
       - postgres
+      - backend-images-store
+    restart: always
+    env_file:
+      - .env
+    security_opt:
+       - label:disable
+
+  backend-images-store:
+    build:
+      context: ../backend
+      dockerfile: ./build/images-store.dockerfile
+    volumes:
+      - ./logs:/app/logs
+      - ./state:/app/state
+    networks:
+      - private
     restart: always
     env_file:
       - .env

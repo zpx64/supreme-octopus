@@ -14,6 +14,7 @@ import (
 )
 
 type store struct {
+	// TODO: maybe add support for user_id in info about image?
 	imagesMap      map[uint64]string
 	imagesMapMutex sync.RWMutex
 	stateFile      *os.File
@@ -36,7 +37,7 @@ func SyncWithDiskState() error {
 	storeForImages.imagesMapMutex.Lock()
 	defer storeForImages.imagesMapMutex.Unlock()
 
-	j, _ := json.Marshal(&storeForImages.imagesMap)
+	j, _ := json.Marshal(storeForImages.imagesMap)
 
 	_, err := storeForImages.stateFile.Write(j)
 	if err != nil {
@@ -58,10 +59,6 @@ func syncWithDiskStateInBackground() {
 				logger.Warn().Err(err).Send()
 			}
 		case <-stopChan:
-			err := SyncWithDiskState()
-			if err != nil {
-				logger.Warn().Err(err).Send()
-			}
 			logger.Info().Msg("stoped syncing with disk")
 			return
 		}
@@ -85,10 +82,11 @@ func Init(log *zerolog.Logger) error {
 
 	storeForImages.stateFile, err = os.OpenFile(
 		stateFilePath,
-		os.O_CREATE|os.O_RDWR,
+		os.O_CREATE|os.O_RDWR|os.O_TRUNC,
 		0777,
 	)
 	if err != nil {
+		logger.Warn().Err(err).Msg("an error with file creation")
 		return err
 	}
 
@@ -109,6 +107,7 @@ func Init(log *zerolog.Logger) error {
 	if errors.Is(err, os.ErrNotExist) {
 		err = os.Mkdir(stateImagesDir, 0777)
 		if err != nil {
+			logger.Warn().Err(err).Msg("an error with dir creation")
 			return err
 		}
 	}
@@ -133,7 +132,9 @@ func Init(log *zerolog.Logger) error {
 //	arseniy dont ask me how to do it.
 func Deinit() error {
 	stopChan <- struct{}{}
+	err := SyncWithDiskState()
+	logger.Error().Err(err).Msg("an error with state file")
 	storeForImages.stateFile.Close()
 	storeForImages.imagesMapMutex.Lock()
-	return nil
+	return err
 }

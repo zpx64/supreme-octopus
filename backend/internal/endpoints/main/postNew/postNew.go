@@ -113,7 +113,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	userId, err := auth.GetUserIdByAccessToken(accessTokenUint)
 	if err != nil {
-		log.Warn().Err(err).Msg("unsigned integer conversion error")
+		log.Warn().Err(err).Msg("error with access token")
 
 		out.Err = err.Error()
 		out.Status = http.StatusInternalServerError

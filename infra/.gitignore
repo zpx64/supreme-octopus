@@ -2,3 +2,4 @@ postgres/data
 logs/
 static/
 .env
+state/

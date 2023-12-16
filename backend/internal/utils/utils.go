@@ -140,6 +140,48 @@ func BinaryEndPointPrerequisites(
 	return http.StatusOK, nil
 }
 
+// TODO: fix soooo fucking big function names
+//       dont use cringe abbreviatures plzzzzz
+
+func EndPointPrerequisitesWithoutMaxBodyLenAndValidation[T any](
+	log *zerolog.Logger,
+	w http.ResponseWriter,
+	r *http.Request,
+	limit *limiter.Limiter[string],
+	in *T,
+) (int, error) {
+	err := LimitUserByRemoteAddr(log, r, limit)
+	if err != nil {
+		return http.StatusTooManyRequests, err
+	}
+
+	err = UnmarshalJson(log, r.Body, in)
+	if err != nil {
+		return http.StatusUnprocessableEntity, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func EndPointPrerequisitesWithoutLimiterAndMaxBodyLen[T any](
+	log *zerolog.Logger,
+	w http.ResponseWriter,
+	r *http.Request,
+	in *T,
+) (int, error) {
+	err := UnmarshalJson(log, r.Body, in)
+	if err != nil {
+		return http.StatusUnprocessableEntity, err
+	}
+
+	err = ValidateStruct(log, in)
+	if err != nil {
+		return http.StatusUnprocessableEntity, err
+	}
+
+	return http.StatusOK, nil
+}
+
 func EndPointPrerequisitesWithoutMaxBodyLen[T any](
 	log *zerolog.Logger,
 	w http.ResponseWriter,

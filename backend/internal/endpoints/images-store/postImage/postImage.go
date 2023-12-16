@@ -13,15 +13,12 @@ import (
 	"github.com/nofeaturesonlybugs/z85"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
-	"github.com/ssleert/limiter"
 )
 
 var (
 	// api endpoint like /put
 	name   string
 	logger zerolog.Logger
-
-	limit *limiter.Limiter[string]
 )
 
 type Image struct {
@@ -30,7 +27,7 @@ type Image struct {
 }
 
 type Input struct {
-	Images []Image `json:"images" validate:"required,min=1,max=25,dive"`
+	Images []Image `json:"images" validate:"required,min=1,max=8,dive"`
 }
 
 type Output struct {
@@ -42,9 +39,6 @@ type Output struct {
 func Start(n string, log *zerolog.Logger) error {
 	logger = *log
 	name = n
-
-	logger.Trace().Msg("creating req limiter")
-	limit = limiter.New[string](vars.LimitPerHour, 3600, 2048, 4096, 20)
 
 	logger.Info().Msg("initing images store")
 	err := imagesStore.Init(log)
@@ -75,9 +69,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	var err error
-	out.Status, err = utils.EndPointPrerequisitesWithoutMaxBodyLen(
-		log, w, r, limit, &in,
-	)
+	out.Status, err = 
+		utils.EndPointPrerequisitesWithoutLimiterAndMaxBodyLen(
+			log, w, r, &in,
+		)
 	if err != nil {
 		log.Warn().Err(err).Msg("preresquisites error")
 
@@ -86,9 +81,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Trace().Int("input_size", len(in.Images[0].EncodedImage)).Send()
-
 	for i, image := range in.Images {
+		log.Trace().Int("input_size", len(in.Images[i].EncodedImage)).Msg("input size of images")
+
 		decodedImage, err := z85.PaddedDecode(image.EncodedImage)
 		if err != nil {
 			log.Warn().Err(err).Msg("z85 decoding error")
@@ -116,7 +111,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Debug().
-		Interface("input_json", in).
 		Interface("output_json", out).
 		Send()
 }

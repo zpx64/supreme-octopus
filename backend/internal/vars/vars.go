@@ -41,8 +41,11 @@ var (
 	ErrImageUpload                         = errors.New("25: Image upload failed.")
 	ErrZ85Incorrect                        = errors.New("26: Incorrect encoded z85: ")
 	ErrIncorrectContentLength              = errors.New("27: Incorrect content length.")
+	ErrInternalJsonParsing                 = errors.New("28: Internal json parser error.")
+	ErrInternalMicroserviceRequest         = errors.New("29: Internal microservice request failed.")
 
 	// values from env
+	// TODO: rewrite with https://github.com/Netflix/go-env
 	HttpPort                = env.GetDefault("HTTP_PORT", "9876")
 	HttpDomainName          = env.GetDefault("HTTP_DOMAIN_NAME", "http://localhost")
 	TimeoutSeconds          = env.GetIntDefault("TIMEOUT_SECONDS", 30)
@@ -54,6 +57,7 @@ var (
 	LogPath                 = env.GetDefault("LOG_PATH", "./logs")
 	LogStdout               = env.GetBoolDefault("LOG_STDOUT", true)
 	DebugMode               = env.GetBoolDefault("DEBUG_MODE", true)
+	ImagesStoreUrl          = env.GetDefault("IMAGES_STORE_URL", "backend-images-store")	
 	PostgresUser            = env.GetDefault("POSTGRES_USER", "admin")
 	PostgresPassword        = env.GetDefault("POSTGRES_PASSWORD", "admin")
 	PostgresDbUrl           = env.GetDefault("POSTGRES_DB_URL", "postgres")
