@@ -65,15 +65,16 @@ func CreateUser(
 	id := 0
 	err = conn.QueryRow(ctx,
 		`WITH new_user_id AS (
-		   INSERT INTO users (nickname, creation_date, name, surname)
-		   VALUES ($1, $2, $3, $4)
+		   INSERT INTO users (nickname, avatar_img, creation_date, name, surname)
+		   VALUES ($1, $2, $3, $4, $5)
 		   RETURNING user_id 
 		 )
 		 INSERT INTO users_credentials (user_id, email, password, pow)
-		 SELECT user_id, $5, $6, $7
+		 SELECT user_id, $6, $7, $8
 		 FROM new_user_id
 		 RETURNING user_id`,
-		data.User.Nickname, data.User.CreationDate,
+		data.User.Nickname, data.User.AvatarImg,
+		data.User.CreationDate,
 		data.User.Name, data.User.Surname,
 		data.Credentials.Email, data.Credentials.Password,
 		data.Credentials.Pow,
@@ -201,4 +202,62 @@ func InsertNewPost(
 	}
 
 	return id, nil
+}
+
+func ListPosts(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	offset uint, 
+	limit  uint,
+) ([]model.UserNPost, error) {
+	rows, err := conn.Query(ctx,
+		`SELECT u.nickname, u.avatar_img,
+       up.post_id, up.creation_date, up.post_type,
+       up.body, up.attachments,
+       up.votes_amount, up.comments_amount
+		 FROM users_posts AS up
+		 JOIN users AS u 
+		 ON u.user_id = up.user_id
+		 ORDER BY up.creation_date
+		 LIMIT $1
+		 OFFSET $2`,
+		limit, offset,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, vars.ErrNotInDb
+		}
+		return nil, err
+	}
+	defer rows.Close()
+
+
+	// TODO: make smart preallocation
+	//       based on rows amount
+	posts := make([]model.UserNPost, 0, 32)
+	for rows.Next() {
+		userPost := model.UserNPost{}
+		err = rows.Scan(
+			&userPost.User.Nickname,
+			&userPost.User.AvatarImg,
+			&userPost.Post.PostId,
+			&userPost.Post.CreationDate,
+			&userPost.Post.PostType,
+			&userPost.Post.Body,
+			&userPost.Post.Attachments,
+			&userPost.Post.VotesAmount,
+			&userPost.Post.CommentsAmount,
+		)
+		if err != nil {
+			return nil, err
+		}
+		
+		posts = append(posts, userPost)
+	}
+
+	if rows.Err() != nil {
+			return nil, err
+	}
+
+	return posts, nil
 }

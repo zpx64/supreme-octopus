@@ -16,10 +16,16 @@ type UserNCred struct {
 	Credentials UserCredentials `json:"credentials"`
 }
 
+type UserNPost struct {
+	User User     `json:"user"`
+	Post UserPost `json:"post"`
+}
+
 type User struct {
 	UserId       int       `json:"user_id"`
 	CreationDate time.Time `json:"creation_date"`
 	Nickname     string    `json:"nickname"`
+	AvatarImg    string    `json:"avatar_img"`
 	Name         *string   `json:"name,omitempty"`
 	Surname      *string   `json:"surname,omitempty"`
 }

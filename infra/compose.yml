@@ -10,6 +10,8 @@ services:
     ports:
       - 443:443
       - 80:80
+    volumes:
+      - ./state/images_store:/static/images
     networks:
       - private
     depends_on:

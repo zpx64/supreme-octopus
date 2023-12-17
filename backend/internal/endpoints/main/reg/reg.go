@@ -155,9 +155,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	hashedPassword := utils.HashPassWithPows(in.Password, localPow)
 
+	// TODO: rewrite with global contant
 	dbModel := model.UserNCred{
 		User: model.User{
 			Nickname:     in.Nickname,
+			AvatarImg:    "default",
 			Name:         in.Name,
 			Surname:      in.Surname,
 			CreationDate: time.Now(),

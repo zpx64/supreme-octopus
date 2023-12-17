@@ -23,6 +23,14 @@ func HashDeviceId(deviceId string) (uint64, error) {
 	return xxhash.Sum64String(deviceId), nil
 }
 
+func ValidateAccessTokenWithDefaultToken(tkn uint64) error {
+	if tkn == DefaultToken {
+		return nil
+	}
+	
+	return ValidateAccessToken(tkn)
+}
+
 // check is access token correct and not expired
 func ValidateAccessToken(tkn uint64) error {
 	token, ok := tokens.accessTokens.Get(tkn)

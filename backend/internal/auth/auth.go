@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/zpx64/supreme-octopus/internal/db"
 	"github.com/zpx64/supreme-octopus/internal/vars"
@@ -35,6 +36,8 @@ var (
 		accessTokens:  mumap.New[uint64, accessToken](vars.DefaultMapSize),
 		refreshTokens: mumap.New[string, refreshToken](vars.DefaultMapSize),
 	}
+
+	DefaultToken uint64
 )
 
 // i dont really understand why we need context here
@@ -49,6 +52,11 @@ func Init(ctx context.Context, log zerolog.Logger) error {
 	dbConnPool, err = pgxpool.New(
 		ctx, db.GetConnString(),
 	)
+	if err != nil {
+		return err
+	}
+
+	DefaultToken, err = strconv.ParseUint(vars.DefaultTokenForAnonymous, 10, 64)
 	if err != nil {
 		return err
 	}
