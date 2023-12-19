@@ -338,21 +338,18 @@ func VotePost(
 		return 0, err
 	}
 
-	// TODO: rewrite with normal sql generation
-	//       without fucking fmt.Sprintf
 	var (
 		votesAppend = 1
 	)
-
 	if existsLike {
 		if voteType != voteTypeFromDb {
-			votesAppend = 2
+			votesAppend += 1
 		}
 	}
-
 	if voteType == model.VoteDownvote {
 		votesAppend = -votesAppend
 	}
+
 	_, err = tx.Exec(ctx,
 		`UPDATE users_posts 
 		 SET votes_amount = votes_amount + $1

@@ -29,7 +29,7 @@ var (
 type Input struct {
 	AccessToken string           `json:"access_token"  validate:"required,max=256"`
 	PostId      int              `json:"post_id"       validate:"required"`
-	Action      model.VoteAction `json:"action"        validate:"required"`
+	Action      model.VoteAction `json:"action"        validate:"required,min=1,max=2"`
 }
 
 type Output struct {
