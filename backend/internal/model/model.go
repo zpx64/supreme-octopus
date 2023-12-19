@@ -5,12 +5,14 @@ import (
 )
 
 type Post int
+
 const (
 	PostArticle Post = iota + 1
 	PostThought
 )
 
 type VoteAction int
+
 const (
 	VoteUpvote VoteAction = iota + 1
 	VoteDownvote
@@ -70,4 +72,15 @@ type UserLike struct {
 	PostId       int        `json:"post_id"`
 	VoteType     VoteAction `json:"vote_type"`
 	CreationDate time.Time  `json:"creation_date"`
+}
+
+type UserComment struct {
+	CommentId    int       `json:"comment_id"`
+	UserId       int       `json:"user_id"`
+	PostId       int       `json:"post_id"`
+	Body         string    `json:"body"`
+	Attachments  []string  `json:"attachments"`
+	CreationDate time.Time `json:"creation_date"`
+	VotesAmount  int       `json:"votes_amount"`
+	ReplyId      *int      `json:"reply_id"`
 }

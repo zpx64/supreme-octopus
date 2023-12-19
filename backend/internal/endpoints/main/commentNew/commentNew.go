@@ -1,4 +1,4 @@
-package postNew
+package commentNew
 
 import (
 	"context"
@@ -26,18 +26,18 @@ var (
 	dbConn *pgxpool.Pool
 )
 
-// TODO: disable attachments in model.PostArticle
 type Input struct {
-	AccessToken string     `json:"access_token"  validate:"required,max=256"`
-	PostType    model.Post `json:"post_type"     validate:"required"`
-	Body        string     `json:"body"          validate:"required,min=5"`
-	Attachments []string   `json:"attachments"   validate:"required,max=8"`
+	AccessToken string   `json:"access_token"  validate:"required,max=256"`
+	PostId      int      `json:"post_id"       validate:"required"`
+	Body        string   `json:"body"          validate:"required,min=5"`
+	Attachments []string `json:"attachments"   validate:"required,max=8"`
+	ReplyId     *int     `json:"reply_id"` // should be zero if not reply
 }
 
 type Output struct {
-	PostId int    `json:"post_id"`
-	Err    string `json:"error"`
-	Status int    `json:"-"`
+	CommentId int    `json:"comment_id"`
+	Err       string `json:"error"`
+	Status    int    `json:"-"`
 }
 
 func Start(n string, log *zerolog.Logger) error {
@@ -132,13 +132,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
-			id, err = db.InsertNewPost(ctx, c,
-				model.UserPost{
+			id, err = db.InsertNewComment(ctx, c,
+				model.UserComment{
 					UserId:       userId,
-					CreationDate: time.Now(),
-					PostType:     in.PostType,
+					PostId:       in.PostId,
 					Body:         in.Body,
 					Attachments:  in.Attachments,
+					CreationDate: time.Now(),
+					VotesAmount:  0,
+					ReplyId:      in.ReplyId,
 				},
 			)
 			return err
@@ -154,7 +156,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out.PostId = id
+	out.CommentId = id
 
 	log.Debug().
 		Interface("input_json", in).

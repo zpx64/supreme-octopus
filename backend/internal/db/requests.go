@@ -266,7 +266,7 @@ func VotePost(
 	ctx context.Context,
 	conn *pgxpool.Conn,
 	userId int,
-	postId int,	
+	postId int,
 	voteType model.VoteAction,
 	creationDate time.Time,
 ) (int, error) {
@@ -280,7 +280,7 @@ func VotePost(
 	err = tx.QueryRow(ctx,
 		`SELECT EXISTS(SELECT 1 FROM users_posts
 	   WHERE post_id = $1)`,
-		 postId,
+		postId,
 	).Scan(&existsPost)
 	if err != nil {
 		return 0, err
@@ -288,7 +288,7 @@ func VotePost(
 
 	if !existsPost {
 		return 0, vars.ErrNotInDb
-	}	
+	}
 
 	var (
 		voteTypeFromDb model.VoteAction
@@ -298,7 +298,7 @@ func VotePost(
 	err = tx.QueryRow(ctx,
 		`SELECT vote_type, like_id FROM users_likes
 	   WHERE post_id = $1 AND user_id = $2`,
-		 postId, userId,
+		postId, userId,
 	).Scan(&voteTypeFromDb, &likeId)
 	if err != nil {
 		if err != pgx.ErrNoRows {
@@ -324,7 +324,7 @@ func VotePost(
 			 RETURNING like_id`,
 			userId, postId, voteType, creationDate,
 		).Scan(&id)
-	} else {	
+	} else {
 		err = tx.QueryRow(ctx,
 			`UPDATE users_likes
 			 SET vote_type = $3,
@@ -359,8 +359,33 @@ func VotePost(
 
 	err = tx.Commit(ctx)
 	if err != nil {
-			return 0, err
+		return 0, err
 	}
 	return id, nil
 }
 
+func InsertNewComment(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	comment model.UserComment,
+) (int, error) {
+	var (
+		id int
+	)
+	err := conn.QueryRow(ctx,
+		`INSERT INTO users_comments (
+		   user_id, post_id, body, attachments,
+		   creation_date, votes_amount, reply_id
+		 )
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 RETURNING comment_id`,
+		comment.UserId, comment.PostId, comment.Body,
+		comment.Attachments, comment.CreationDate,
+		comment.VotesAmount, comment.ReplyId,
+	).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}

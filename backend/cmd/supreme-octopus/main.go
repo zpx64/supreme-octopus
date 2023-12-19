@@ -13,6 +13,7 @@ import (
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
 	// endpoints
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/commentNew"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/listPosts"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/login"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/postImage"
@@ -41,6 +42,7 @@ var (
 		{"/login", login.Start, login.Handler, login.Stop},
 		{"/refresh", refresh.Start, refresh.Handler, refresh.Stop},
 		{"/post_new", postNew.Start, postNew.Handler, postNew.Stop},
+		{"/comment_new", commentNew.Start, commentNew.Handler, commentNew.Stop},
 		{"/post_image", postImage.Start, postImage.Handler, postImage.Stop},
 		{"/list_posts", listPosts.Start, listPosts.Handler, listPosts.Stop},
 		{"/post_vote", postVote.Start, postVote.Handler, postVote.Stop},
