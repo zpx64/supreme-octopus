@@ -5,10 +5,15 @@ import (
 )
 
 type Post int
-
 const (
-	PostArticle Post = 1
+	PostArticle Post = iota + 1
 	PostThought
+)
+
+type VoteAction int
+const (
+	VoteUpvote VoteAction = iota + 1
+	VoteDownvote
 )
 
 type UserNCred struct {
@@ -57,4 +62,12 @@ type UserPost struct {
 	Attachments    []string  `json:"attachments"`
 	VotesAmount    int       `json:"votes_amount"`
 	CommentsAmount int       `json:"comments_amount"`
+}
+
+type UserLike struct {
+	LikeId       int        `json:"like_id"`
+	UserId       int        `json:"user_id"`
+	PostId       int        `json:"post_id"`
+	VoteType     VoteAction `json:"vote_type"`
+	CreationDate time.Time  `json:"creation_date"`
 }

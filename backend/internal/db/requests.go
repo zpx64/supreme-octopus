@@ -4,6 +4,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/zpx64/supreme-octopus/internal/model"
 	"github.com/zpx64/supreme-octopus/internal/vars"
@@ -193,7 +194,7 @@ func InsertNewPost(
 		 )
 		 VALUES ($1, $2, $3, $4, $5, $6, $7)
 		 RETURNING post_id`,
-		post.UserId, post.CreationDate, post.PostType, 
+		post.UserId, post.CreationDate, post.PostType,
 		post.Body, post.Attachments, post.VotesAmount,
 		post.CommentsAmount,
 	).Scan(&id)
@@ -207,8 +208,8 @@ func InsertNewPost(
 func ListPosts(
 	ctx context.Context,
 	conn *pgxpool.Conn,
-	offset uint, 
-	limit  uint,
+	offset uint,
+	limit uint,
 ) ([]model.UserNPost, error) {
 	rows, err := conn.Query(ctx,
 		`SELECT u.nickname, u.avatar_img,
@@ -231,7 +232,6 @@ func ListPosts(
 	}
 	defer rows.Close()
 
-
 	// TODO: make smart preallocation
 	//       based on rows amount
 	posts := make([]model.UserNPost, 0, 32)
@@ -251,13 +251,119 @@ func ListPosts(
 		if err != nil {
 			return nil, err
 		}
-		
+
 		posts = append(posts, userPost)
 	}
 
 	if rows.Err() != nil {
-			return nil, err
+		return nil, err
 	}
 
 	return posts, nil
 }
+
+func VotePost(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	userId int,
+	postId int,	
+	voteType model.VoteAction,
+	creationDate time.Time,
+) (int, error) {
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback(ctx)
+
+	var existsPost bool
+	err = tx.QueryRow(ctx,
+		`SELECT EXISTS(SELECT 1 FROM users_posts
+	   WHERE post_id = $1)`,
+		 postId,
+	).Scan(&existsPost)
+	if err != nil {
+		return 0, err
+	}
+
+	if !existsPost {
+		return 0, vars.ErrNotInDb
+	}	
+
+	var (
+		voteTypeFromDb model.VoteAction
+		likeId         int
+		existsLike     bool
+	)
+	err = tx.QueryRow(ctx,
+		`SELECT vote_type, like_id FROM users_likes
+	   WHERE post_id = $1 AND user_id = $2`,
+		 postId, userId,
+	).Scan(&voteTypeFromDb, &likeId)
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			return 0, err
+		}
+	} else {
+		existsLike = true
+	}
+
+	if existsLike {
+		if voteTypeFromDb == voteType {
+			return likeId, nil
+		}
+	}
+
+	var (
+		id int
+	)
+	if !existsLike {
+		err = tx.QueryRow(ctx,
+			`INSERT INTO users_likes (user_id, post_id, vote_type, creation_date)
+			 VALUES ($1, $2, $3, $4)
+			 RETURNING like_id`,
+			userId, postId, voteType, creationDate,
+		).Scan(&id)
+	} else {	
+		err = tx.QueryRow(ctx,
+			`UPDATE users_likes
+			 SET vote_type = $3,
+			     creation_date = $4
+			 WHERE user_id = $1 AND post_id = $2
+			 RETURNING like_id`,
+			userId, postId, voteType, creationDate,
+		).Scan(&id)
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	// TODO: rewrite with normal sql generation
+	//       without fucking fmt.Sprintf
+	var (
+		votesAppend = 1
+	)
+
+	if existsLike {
+		if voteType != voteTypeFromDb {
+			votesAppend = 2
+		}
+	}
+
+	if voteType == model.VoteDownvote {
+		votesAppend = -votesAppend
+	}
+	_, err = tx.Exec(ctx,
+		`UPDATE users_posts 
+		 SET votes_amount = votes_amount + $1
+		 WHERE post_id = $2`,
+		votesAppend, postId,
+	)
+
+	err = tx.Commit(ctx)
+	if err != nil {
+			return 0, err
+	}
+	return id, nil
+}
+

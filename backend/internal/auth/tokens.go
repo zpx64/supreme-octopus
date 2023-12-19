@@ -27,7 +27,7 @@ func ValidateAccessTokenWithDefaultToken(tkn uint64) error {
 	if tkn == DefaultToken {
 		return nil
 	}
-	
+
 	return ValidateAccessToken(tkn)
 }
 
