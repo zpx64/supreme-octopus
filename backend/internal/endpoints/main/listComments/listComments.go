@@ -1,4 +1,4 @@
-package commentNew
+package listComments
 
 import (
 	"context"
@@ -26,18 +26,16 @@ var (
 	dbConn *pgxpool.Pool
 )
 
+// TODO: disable attachments in model.PostArticle
 type Input struct {
-	AccessToken string   `json:"access_token"  validate:"required,max=256"`
-	PostId      int      `json:"post_id"       validate:"required,min=1"`
-	Body        string   `json:"body"          validate:"required,min=5"`
-	Attachments []string `json:"attachments"   validate:"required,max=8"`
-	ReplyId     *int     `json:"reply_id"` // should be zero if not reply
+	AccessToken string `json:"access_token" validate:"required,min=5,max=100"`
+	PostId      int    `json:"post_id"      validate:"required,min=1"`
 }
 
 type Output struct {
-	CommentId int    `json:"comment_id"`
-	Err       string `json:"error"`
-	Status    int    `json:"-"`
+	Comments []model.CommentWithUser `json:"comments"`
+	Err      string                  `json:"error"`
+	Status   int                     `json:"-"`
 }
 
 func Start(n string, log *zerolog.Logger) error {
@@ -112,7 +110,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, err := auth.GetUserIdByAccessToken(accessTokenUint)
+	err = auth.ValidateAccessTokenWithDefaultToken(accessTokenUint)
 	if err != nil {
 		log.Warn().Err(err).Msg("error with access token")
 
@@ -128,20 +126,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var (
-		id int
+		comments []model.CommentWithUser
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
-			id, err = db.InsertNewComment(ctx, c,
-				model.UserComment{
-					UserId:       userId,
-					PostId:       in.PostId,
-					Body:         in.Body,
-					Attachments:  in.Attachments,
-					CreationDate: time.Now(),
-					VotesAmount:  0,
-					ReplyId:      in.ReplyId,
-				},
+			comments, err = db.GetCommentsByPostId(ctx, c,
+				in.PostId,
 			)
 			return err
 		},
@@ -156,7 +146,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out.CommentId = id
+	out.Comments = comments
 
 	log.Debug().
 		Interface("input_json", in).

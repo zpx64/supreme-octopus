@@ -389,3 +389,53 @@ func InsertNewComment(
 
 	return id, nil
 }
+
+func GetCommentsByPostId(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	postId int,
+) ([]model.CommentWithUser, error) {
+	rows, err := conn.Query(ctx,
+		`SELECT uc.comment_id, u.nickname, u.avatar_img, 
+            uc.body, uc.attachments, uc.creation_date,
+  		      uc.votes_amount, uc.reply_id 
+		 FROM users_comments AS uc
+		 JOIN users AS u
+		 ON u.user_id = uc.user_id
+		 WHERE post_id = $1
+		 ORDER BY reply_id DESC`,
+		 postId,
+	)
+	if err != nil {
+			return nil, err
+	}
+	defer rows.Close()
+
+	// TODO: make smart preallocation
+	//       based on rows amount
+	comments := make([]model.CommentWithUser, 0, 32)
+	for rows.Next() {
+		comment := model.CommentWithUser{}
+		err = rows.Scan(
+			&comment.CommentId,
+			&comment.Nickname,
+			&comment.AvatarImg,
+			&comment.Body,
+			&comment.Attachments,
+			&comment.CreationDate,
+			&comment.VotesAmount,
+			&comment.ReplyId,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		comments = append(comments, comment)
+	}
+
+	if rows.Err() != nil {
+		return nil, err
+	}
+
+	return comments, nil
+}

@@ -8,10 +8,10 @@ CREATE TABLE IF NOT EXISTS users_comments (
   attachments   TEXT[]      NOT NULL,
   creation_date TIMESTAMPTZ NOT NULL, 
   votes_amount  INTEGER     NOT NULL,
-  reply_id      INTEGER     REFERENCES users_comments(comment_id) -- naive implementation of reply threads
-  -- i dont really know need we reference or something other kind of rellation
-  -- but it should be converted to some kind of graph
-  -- and after it sends to frontend
+  reply_id      INTEGER     REFERENCES users_comments(comment_id) -- naive implementation of response threads
+  -- I don't know if links should be used or something else.
+  -- but it should be converted into some sort of graph
+  -- and then send it to the frontend afterwards
 )
 
 ---- create above / drop below ----

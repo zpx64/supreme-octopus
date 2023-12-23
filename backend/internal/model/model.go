@@ -28,6 +28,17 @@ type UserNPost struct {
 	Post UserPost `json:"post"`
 }
 
+type CommentWithUser struct {
+	CommentId    int       `json:"comment_id"`
+	Nickname     string    `json:"nickname"`
+	AvatarImg    string    `json:"avatar_img"`
+	Body         string    `json:"body"`
+	Attachments  []string  `json:"attachments"`
+	CreationDate time.Time `json:"creation_date"`
+	VotesAmount  int       `json:"votes_amount"`
+	ReplyId      *int      `json:"reply_id"`
+}
+
 type User struct {
 	UserId       int       `json:"user_id"`
 	CreationDate time.Time `json:"creation_date"`

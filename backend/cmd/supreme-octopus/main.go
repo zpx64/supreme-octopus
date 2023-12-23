@@ -15,6 +15,7 @@ import (
 	// endpoints
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/commentNew"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/listPosts"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/listComments"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/login"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/postImage"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/postNew"
@@ -45,6 +46,7 @@ var (
 		{"/comment_new", commentNew.Start, commentNew.Handler, commentNew.Stop},
 		{"/post_image", postImage.Start, postImage.Handler, postImage.Stop},
 		{"/list_posts", listPosts.Start, listPosts.Handler, listPosts.Stop},
+		{"/list_comments", listComments.Start, listComments.Handler, listComments.Stop},
 		{"/post_vote", postVote.Start, postVote.Handler, postVote.Stop},
 	}
 	logger zerolog.Logger
