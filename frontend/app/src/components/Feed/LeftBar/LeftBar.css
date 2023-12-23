@@ -1,0 +1,48 @@
+.leftbar-wrapper {
+  display: flex;
+  height: 100%;
+  width: 75px;
+  position: fixed;
+  margin-left: 20px;
+  top: 0;
+}
+
+.leftbar {
+  width: 75px;
+  margin: auto;
+  border-radius: 12px;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px 0px #000; 
+}
+
+.leftbar > button {
+  height: 48px;
+  width: 48px;
+  margin: 10px;
+  background: white;
+  border-radius: 100%;
+  border: 2px solid #000; 
+  box-shadow: 2px 2px 0px 0px #000;
+}
+
+.leftbar > button:active {
+  box-shadow: none;
+  scale: 0.95;
+}
+
+.leftbar-sep {
+  height: 2px;
+  width: 47px;
+  margin: 8px auto;
+  background-color: black;
+}
+
+.leftbar-hidden-sep {
+  height: 2px;
+  width: 48px;
+  margin: px auto;
+}
+
+.leftbar > button  > img {
+  margin-top: 4px;
+}

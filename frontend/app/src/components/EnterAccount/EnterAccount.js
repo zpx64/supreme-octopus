@@ -36,12 +36,12 @@ function SignUpScreen({onLoginClick}) {
   return (
     <>
       <div className="enterAccountWindowContainer">
-        <div className="windowSignUp">
-          <div className="windowHeader">
+        <div className="window-signup">
+          <div className="window-header">
             <p>account / signup</p>
             <a href="https://google.com/"> </a>
           </div>
-          <form className="windowArea" onSubmit={handleSignUp}>
+          <form className="window-area" onSubmit={handleSignUp}>
             <div className="section">
               <p>Login</p>
               <input type="text" id="nickname" name="login" placeholder="login" minLength="3" maxLength="256" onChange={handleChangeValue}/>
@@ -96,12 +96,12 @@ function LoginScreen({onSignUpClick}) {
   return (
     <>
       <div className="enterAccountWindowContainer">
-        <div className="windowLogin">
-          <div className="windowHeader">
+        <div className="window-login">
+          <div className="window-header">
             <p>account / login</p>
             <a href="https://google.com/"> </a>
           </div>
-          <div className="windowArea">
+          <div className="window-area">
             <div className="section">
               <p>Email</p>
               <input type="email" id="email" name="email" placeholder="email" minLength="3" maxLength="256" onChange={handleChangeValue} />

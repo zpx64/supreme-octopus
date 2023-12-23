@@ -3,6 +3,15 @@
   src: url("./assets/fonts/ChicagoBitmap-Regular.ttf");
 }
 
-body, input, button {
+body, input, textarea, button {
   font-family: 'Chicago';
+}
+
+button {
+  background-color: white;
+  border: none;
+}
+
+.display-flex {
+  display: flex;
 }
