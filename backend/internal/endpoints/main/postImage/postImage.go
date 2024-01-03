@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/zpx64/supreme-octopus/internal/auth"
-	"github.com/zpx64/supreme-octopus/internal/imagesStore"
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
@@ -159,10 +158,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Stop() error {
-	err := imagesStore.Deinit()
-	if err != nil {
-		logger.Warn().Err(err).Msg("an error with images store")
-	}
 	logger.Info().Msgf("%s endpoint stoped", name)
 	return nil
 }
