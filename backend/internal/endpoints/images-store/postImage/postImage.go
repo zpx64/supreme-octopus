@@ -31,9 +31,10 @@ type Input struct {
 }
 
 type Output struct {
-	WritedIds []string `json:"writed_ids"`
-	Err       string   `json:"error"`
-	Status    int      `json:"-"`
+	WritedIds   []string `json:"writed_ids"`
+	ImageErrors []string `json:"image_errors"`
+	Err         string   `json:"error"`
+	Status      int      `json:"-"`
 }
 
 func Start(n string, log *zerolog.Logger) error {
@@ -59,9 +60,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	in := Input{}
 	out := Output{
-		WritedIds: make([]string, 0, 32),
-		Err:       "null",
-		Status:    http.StatusOK,
+		Err:    "null",
+		Status: http.StatusOK,
 	}
 
 	defer func() {
@@ -81,33 +81,73 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	results := make([]chan utils.Result[uint64], len(in.Images))
+	for i := range results {
+		results[i] = make(chan utils.Result[uint64])
+	}
+
 	for i, image := range in.Images {
 		log.Trace().Int("input_size", len(in.Images[i].EncodedImage)).Msg("input size of images")
 
-		decodedImage, err := z85.PaddedDecode(image.EncodedImage)
-		if err != nil {
-			log.Warn().Err(err).Msg("z85 decoding error")
+		go func(i int, image Image, res chan utils.Result[uint64]) {
+			log.Trace().Msg("decoding z85")
+			decodedImage, err := z85.PaddedDecode(image.EncodedImage)
+			if err != nil {
+				log.Warn().Err(err).Msg("z85 decoding error")
 
-			out.Err = errors.Join(
-				vars.ErrZ85Incorrect,
-				fmt.Errorf("on %d image", i),
-			).Error()
-			out.Status = http.StatusUnprocessableEntity
-			return
+				res <- utils.Result[uint64]{
+					Err: errors.Join(
+						vars.ErrZ85Incorrect,
+						fmt.Errorf("on %d image", i),
+					),
+				}
+				return
+			}
+
+			log.Trace().Msg("posting image to store")
+			writedImageHash, err := imagesStore.PostImageToStore(decodedImage, image.ContentType)
+			if err != nil {
+				log.Warn().Err(err).Msg("image posting to store error")
+
+				res <- utils.Result[uint64]{
+					Err: errors.Join(
+						vars.ErrImageUpload,
+						fmt.Errorf("on %d image", i),
+					),
+				}
+				return
+			}
+
+			res <- utils.Result[uint64]{
+				Val: writedImageHash,
+				Err: nil,
+			}
+		}(i, image, results[i])
+	}
+
+	imageHashes := make([]utils.Result[uint64], 0, len(in.Images))
+	for _, result := range results {
+		imageHashes = append(imageHashes, <-result)
+	}
+	log.Trace().Msg("result readed from channels")
+
+	// error check
+	out.ImageErrors = make([]string, len(imageHashes))
+	out.WritedIds = make([]string, len(imageHashes))
+	errCounter := 0
+	for i, imageHash := range imageHashes {
+		if imageHash.Err != nil {
+			out.ImageErrors[i] = imageHash.Err.Error()
+			out.WritedIds[i] = "0"
+			errCounter++
+			if errCounter == 1 {
+				out.Err = imageHash.Err.Error()
+			}
+			continue
 		}
 
-		writedImageHash, err := imagesStore.PostImageToStore(decodedImage, image.ContentType)
-		if err != nil {
-			log.Warn().Err(err).Msg("image posting to store error")
-
-			out.Err = errors.Join(
-				vars.ErrImageUpload,
-				fmt.Errorf("on %d image", i),
-			).Error()
-			out.Status = http.StatusUnprocessableEntity
-			return
-		}
-		out.WritedIds = append(out.WritedIds, strconv.FormatUint(writedImageHash, 10))
+		out.ImageErrors[i] = "null"
+		out.WritedIds[i] = strconv.FormatUint(imageHash.Val, 10)
 	}
 
 	log.Debug().

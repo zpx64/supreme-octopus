@@ -40,9 +40,10 @@ type InputForImagesStore struct {
 }
 
 type Output struct {
-	WritedIds []string `json:"writed_ids"`
-	Err       string   `json:"error"`
-	Status    int      `json:"-"`
+	WritedIds   []string `json:"writed_ids"`
+	ImageErrors []string `json:"image_errors"`
+	Err         string   `json:"error"`
+	Status      int      `json:"-"`
 }
 
 func Start(n string, log *zerolog.Logger) error {
