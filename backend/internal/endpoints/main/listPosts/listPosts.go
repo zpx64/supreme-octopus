@@ -34,17 +34,17 @@ type Input struct {
 }
 
 type Post struct {
-	Nickname             string     `json:"nickname"`
-	AvatarImg            string     `json:"avatar_img"`
-	Id                   int        `json:"id"`
-	CreationDate         time.Time  `json:"creation_date"`
-	Type                 model.Post `json:"type"`
-	Body                 string     `json:"body"`
-	Attachments          []string   `json:"attachments"`
-	VotesAmount          int        `json:"votes_amount"`
-	IsVoted              bool       `json:"is_voted"`
-	CommentsAmount       int        `json:"comments_amount"`
-	IsCommentsDisallowed bool       `json:"is_comments_disallowed"`
+	Nickname             string           `json:"nickname"`
+	AvatarImg            string           `json:"avatar_img"`
+	Id                   int              `json:"id"`
+	CreationDate         time.Time        `json:"creation_date"`
+	Type                 model.Post       `json:"type"`
+	Body                 string           `json:"body"`
+	Attachments          []string         `json:"attachments"`
+	VotesAmount          int              `json:"votes_amount"`
+	VoteAction           model.VoteAction `json:"vote_action"`
+	CommentsAmount       int              `json:"comments_amount"`
+	IsCommentsDisallowed bool             `json:"is_comments_disallowed"`
 }
 
 type Output struct {
@@ -141,8 +141,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var (
-		posts      []model.UserNPost
-		votedPosts []bool
+		posts []model.UserNPost
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
@@ -162,18 +161,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	votedPosts = make([]bool, len(posts))
+	voteActions := make([]model.VoteAction, len(posts))
 	if userId != 0 {
 		err = dbConn.AcquireFunc(ctx,
 			func(c *pgxpool.Conn) error {
+				// TODO: optimize without loop
 				for i, e := range posts {
-					isVoted, err := db.IsPostVoted(ctx, c,
+					voteAction, err := db.IsPostVoted(ctx, c,
 						userId, e.Post.PostId,
 					)
 					if err != nil {
 						return err
 					}
-					votedPosts[i] = isVoted
+					voteActions[i] = voteAction
 				}
 				return nil
 			},
@@ -200,7 +200,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Body:                 e.Post.Body,
 			Attachments:          e.Post.Attachments,
 			VotesAmount:          e.Post.VotesAmount,
-			IsVoted:              votedPosts[i],
+			VoteAction:           voteActions[i],
 			CommentsAmount:       e.Post.CommentsAmount,
 			IsCommentsDisallowed: e.Post.IsCommentsDisallowed,
 		}

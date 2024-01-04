@@ -269,20 +269,23 @@ func IsPostVoted(
 	conn *pgxpool.Conn,
 	userId int,
 	postId int,
-) (bool, error) {
+) (model.VoteAction, error) {
 	var (
-		result bool
+		voteType model.VoteAction
 	)
 	err := conn.QueryRow(ctx,
-		`SELECT EXISTS(SELECT 1 FROM users_likes
-		 WHERE user_id = $1 AND post_id = $2)`,
+		`SELECT vote_type FROM users_likes
+		 WHERE user_id = $1 AND post_id = $2`,
 		userId, postId,
-	).Scan(&result)
+	).Scan(&voteType)
 	if err != nil {
-		return false, err
+		if err == pgx.ErrNoRows {
+			return 0, nil
+		}
+		return 0, err
 	}
 
-	return result, nil
+	return voteType, nil
 }
 
 func VotePost(
