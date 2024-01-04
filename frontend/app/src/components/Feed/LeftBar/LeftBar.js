@@ -6,17 +6,17 @@ function LeftBar() {
     <div className="leftbar-wrapper">
       <div className="leftbar">
         <button>
-          <img src={NewEntry_Icon}/>
+          <img src={NewEntry_Icon} alt="" />
         </button>
         <div className="leftbar-sep"></div>
         <button>
-          <img />
+          <img alt="" />
         </button>
         <button>
-          <img />
+          <img alt="" />
         </button>
         <button>
-          <img />
+          <img alt="" />
         </button>
       </div>
     </div>

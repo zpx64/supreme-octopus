@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { registerImages } from './sendData';
+
 import './CreateEntry.css';
 import Newspaper from './assets/Newspaper.svg';
 import Note from './assets/Note.svg';
@@ -39,7 +41,8 @@ function ArticleMode() {
 
 function CreateEntry() {
   const [isArticleEnabled, setIsArticleEnabled] = useState(true);
-  const [getUploadedImages, setUploadedImages] = useState([]);
+  const [getUploadedImagesSRC, setUploadedImagesSRC] = useState([]);
+  const [getUploadedImagesFiles, setUploadedImagesFiles] = useState([]);
 
   const enableArticles  = (e) => {
     setIsArticleEnabled(true);
@@ -52,14 +55,22 @@ function CreateEntry() {
   const updateUploadedImages = (e) => {
     const files = e.target.files;
     let newImages = [];
+    let newImagesFiles = [];
 
     for (const file of files) {
       if (file.type.startsWith('image/')) {
         newImages.push(URL.createObjectURL(file));
       }
+
+      newImagesFiles.push(file);
     }
 
-    setUploadedImages([...getUploadedImages, ...newImages]);
+    setUploadedImagesFiles([...getUploadedImagesFiles, ...newImagesFiles]);
+    setUploadedImagesSRC([...getUploadedImagesSRC, ...newImages]);
+  }
+
+  const uploadData = () => {
+    registerImages(getUploadedImagesFiles);
   }
 
   return (
@@ -67,14 +78,14 @@ function CreateEntry() {
       <div className="window-create-note">
         <div className="window-header">
           <p>{ isArticleEnabled ? "entry / createArticle" : "entry / createNote" }</p>
-          <a href="https://google.com/"></a>
+          <a href="https://google.com/"> </a>
         </div>
         <div className="window-area display-flex">
           <div className="create-entry-vertical-bar">
             <button className={`${isArticleEnabled ? "entry-vertical-bar-item-selected" : "entry-vertical-bar-item"}`} style={{borderRadius: "8px 8px 0 0"}} onClick={enableArticles}>
               <div className="entry-vertical-bar-item">
                 <div>
-                  <img src={Newspaper} />
+                  <img src={Newspaper} alt="" />
                 </div>
                 <p>Article</p>
               </div>
@@ -82,7 +93,7 @@ function CreateEntry() {
             <button className={`${isArticleEnabled ? "entry-vertical-bar-item" : "entry-vertical-bar-item-selected"}`} style={{borderRadius: "0 0 8px 8px"}} onClick={enableNotes}>
               <div className="entry-vertical-bar-item">
                 <div>
-                  <img src={Note} />
+                  <img src={Note} alt="" />
                 </div>
                 <p>Note</p>
               </div>
@@ -91,13 +102,13 @@ function CreateEntry() {
               <label htmlFor="img-upload" className="entry-upload-image-button">Add Images</label>
               <input type="file" id="img-upload" name="img" accept="image/*" multiple="multiple" style={{display: "none"}} onChange={updateUploadedImages} />
               <div className="entry-uploaded-image-wrapper">
-              {getUploadedImages.map((image, index) => (
-                <img src={image} className="entry-uploaded-image" key={index} />
+              {getUploadedImagesSRC.map((image, index) => (
+                <img src={image} className="entry-uploaded-image" key={index} alt="" />
               ))}
               </div>
             </>
             }
-            <button className="entry-upload-button">Upload</button>
+            <button className="entry-upload-button" onClick={uploadData}>Upload</button>
           </div>
           { isArticleEnabled ? <ArticleMode /> : <NoteMode />  }
         </div>

@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Feed from './components/Feed/Feed';
 import EnterAccount from './components/EnterAccount/EnterAccount';
 import Background from './components/Background/Background';
-import Notifications from './components/Notifications/Notifications';
+import Notifications from 'utils/Notifications/Notifications';
 
 import './App.css';
 import './styles.css'

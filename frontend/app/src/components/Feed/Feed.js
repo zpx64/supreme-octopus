@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTokens } from '../TokensManagment/TokensManagment';
+import { getTokens } from 'utils/TokensManagment/TokensManagment';
 
 import Scrollbar from '../Scrollbar/Scrollbar';
 import AccountLink from './AccountLink/AccountLink';

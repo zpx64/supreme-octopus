@@ -1,6 +1,6 @@
 import Joi from 'joi';
-import { setTokens } from '../TokensManagment/TokensManagment';
-import notificationStore from '../Notifications/NotificationsStore';
+import { setTokens } from 'utils/TokensManagment/TokensManagment';
+import notificationStore from 'utils/Notifications/NotificationsStore';
 
 
 function returnValidationScheme(action) {
