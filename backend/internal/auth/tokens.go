@@ -45,6 +45,14 @@ func ValidateAccessToken(tkn uint64) error {
 	return nil
 }
 
+func GetUserIdByAccessTokenWithDefaultToken(tkn uint64) (int, error) {
+	if tkn == DefaultToken {
+		return 0, nil
+	}
+
+	return GetUserIdByAccessToken(tkn)
+}
+
 func GetUserIdByAccessToken(tkn uint64) (int, error) {
 	err := ValidateAccessToken(tkn)
 	if err != nil {
@@ -76,7 +84,6 @@ func GenTokensPair(
 	deviceId uint64,
 	userAgent string,
 ) (uint64, string, error) {
-
 	hash, uid, err := GetTokens()
 	if err != nil {
 		return 0, "", err

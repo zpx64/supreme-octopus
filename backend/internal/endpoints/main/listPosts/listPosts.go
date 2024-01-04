@@ -34,15 +34,17 @@ type Input struct {
 }
 
 type Post struct {
-	Nickname       string     `json:"nickname"`
-	AvatarImg      string     `json:"avatar_img"`
-	Id             int        `json:"id"`
-	CreationDate   time.Time  `json:"creation_date"`
-	Type           model.Post `json:"type"`
-	Body           string     `json:"body"`
-	Attachments    []string   `json:"attachments"`
-	VotesAmount    int        `json:"votes_amount"`
-	CommentsAmount int        `json:"comments_amount"`
+	Nickname             string     `json:"nickname"`
+	AvatarImg            string     `json:"avatar_img"`
+	Id                   int        `json:"id"`
+	CreationDate         time.Time  `json:"creation_date"`
+	Type                 model.Post `json:"type"`
+	Body                 string     `json:"body"`
+	Attachments          []string   `json:"attachments"`
+	VotesAmount          int        `json:"votes_amount"`
+	IsVoted              bool       `json:"is_voted"`
+	CommentsAmount       int        `json:"comments_amount"`
+	IsCommentsDisallowed bool       `json:"is_comments_disallowed"`
 }
 
 type Output struct {
@@ -123,7 +125,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = auth.ValidateAccessTokenWithDefaultToken(accessTokenUint)
+	userId, err := auth.GetUserIdByAccessTokenWithDefaultToken(accessTokenUint)
 	if err != nil {
 		log.Warn().Err(err).Msg("error with access token")
 
@@ -139,7 +141,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var (
-		posts []model.UserNPost
+		posts      []model.UserNPost
+		votedPosts []bool
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
@@ -159,18 +162,47 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	votedPosts = make([]bool, len(posts))
+	if userId != 0 {
+		err = dbConn.AcquireFunc(ctx,
+			func(c *pgxpool.Conn) error {
+				for i, e := range posts {
+					isVoted, err := db.IsPostVoted(ctx, c,
+						userId, e.Post.PostId,
+					)
+					if err != nil {
+						return err
+					}
+					votedPosts[i] = isVoted
+				}
+				return nil
+			},
+		)
+		if err != nil {
+			log.Warn().
+				Err(err).
+				Msg("an error with database")
+
+			out.Err = vars.ErrWithDb.Error()
+			out.Status = http.StatusInternalServerError
+			return
+		}
+	}
+
 	out.Posts = make([]Post, len(posts))
 	for i, e := range posts {
 		out.Posts[i] = Post{
-			Nickname:       e.User.Nickname,
-			AvatarImg:      e.User.AvatarImg,
-			Id:             e.Post.PostId,
-			CreationDate:   e.Post.CreationDate,
-			Type:           e.Post.PostType,
-			Body:           e.Post.Body,
-			Attachments:    e.Post.Attachments,
-			VotesAmount:    e.Post.VotesAmount,
-			CommentsAmount: e.Post.CommentsAmount,
+			Nickname:             e.User.Nickname,
+			AvatarImg:            e.User.AvatarImg,
+			Id:                   e.Post.PostId,
+			CreationDate:         e.Post.CreationDate,
+			Type:                 e.Post.PostType,
+			Body:                 e.Post.Body,
+			Attachments:          e.Post.Attachments,
+			VotesAmount:          e.Post.VotesAmount,
+			IsVoted:              votedPosts[i],
+			CommentsAmount:       e.Post.CommentsAmount,
+			IsCommentsDisallowed: e.Post.IsCommentsDisallowed,
 		}
 	}
 

@@ -100,7 +100,7 @@ func GetCredentialsByEmail(
 	)
 	err := conn.QueryRow(ctx,
 		`SELECT user_id, email,
-						password, pow
+		        password, pow
 		 FROM users_credentials
 		 WHERE email = $1`,
 		email,
@@ -136,8 +136,8 @@ func InsertNewToken(
 	err := conn.QueryRow(ctx,
 		`INSERT INTO users_tokens (
 		   user_id, device_id, 
-			 refresh_token, user_agent, 
-			 token_date
+		   refresh_token, user_agent, 
+		   token_date
 		 )
 		 VALUES ($1, $2, $3, $4, $5)
 		 RETURNING token_id`,
@@ -189,14 +189,14 @@ func InsertNewPost(
 	err := conn.QueryRow(ctx,
 		`INSERT INTO users_posts (
 		   user_id, creation_date, post_type, 
-			 body, attachments, votes_amount,
-			 comments_amount
+		   body, attachments, votes_amount,
+		   comments_amount, is_comments_disallowed
 		 )
-		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		 RETURNING post_id`,
 		post.UserId, post.CreationDate, post.PostType,
 		post.Body, post.Attachments, post.VotesAmount,
-		post.CommentsAmount,
+		post.CommentsAmount, post.IsCommentsDisallowed,
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -213,9 +213,10 @@ func ListPosts(
 ) ([]model.UserNPost, error) {
 	rows, err := conn.Query(ctx,
 		`SELECT u.nickname, u.avatar_img,
-       up.post_id, up.creation_date, up.post_type,
-       up.body, up.attachments,
-       up.votes_amount, up.comments_amount
+		        up.post_id, up.creation_date, up.post_type,
+		        up.body, up.attachments,
+		        up.votes_amount, up.comments_amount,
+		        up.is_comments_disallowed
 		 FROM users_posts AS up
 		 JOIN users AS u 
 		 ON u.user_id = up.user_id
@@ -247,6 +248,7 @@ func ListPosts(
 			&userPost.Post.Attachments,
 			&userPost.Post.VotesAmount,
 			&userPost.Post.CommentsAmount,
+			&userPost.Post.IsCommentsDisallowed,
 		)
 		if err != nil {
 			return nil, err
@@ -260,6 +262,27 @@ func ListPosts(
 	}
 
 	return posts, nil
+}
+
+func IsPostVoted(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	userId int,
+	postId int,
+) (bool, error) {
+	var (
+		result bool
+	)
+	err := conn.QueryRow(ctx,
+		`SELECT EXISTS(SELECT 1 FROM users_likes
+		 WHERE user_id = $1 AND post_id = $2)`,
+		userId, postId,
+	).Scan(&result)
+	if err != nil {
+		return false, err
+	}
+
+	return result, nil
 }
 
 func VotePost(
@@ -279,7 +302,7 @@ func VotePost(
 	var existsPost bool
 	err = tx.QueryRow(ctx,
 		`SELECT EXISTS(SELECT 1 FROM users_posts
-	   WHERE post_id = $1)`,
+		 WHERE post_id = $1)`,
 		postId,
 	).Scan(&existsPost)
 	if err != nil {
@@ -297,7 +320,7 @@ func VotePost(
 	)
 	err = tx.QueryRow(ctx,
 		`SELECT vote_type, like_id FROM users_likes
-	   WHERE post_id = $1 AND user_id = $2`,
+		 WHERE post_id = $1 AND user_id = $2`,
 		postId, userId,
 	).Scan(&voteTypeFromDb, &likeId)
 	if err != nil {
@@ -356,12 +379,35 @@ func VotePost(
 		 WHERE post_id = $2`,
 		votesAppend, postId,
 	)
+	if err != nil {
+		return 0, err
+	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
+}
+
+func IsCommentsAllowedForPost(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	postId int,
+) (bool, error) {
+	var (
+		result bool
+	)
+	err := conn.QueryRow(ctx,
+		`SELECT is_comments_disallowed FROM users_posts
+		 WHERE post_id = $1`,
+		postId,
+	).Scan(&result)
+	if err != nil {
+		return false, err
+	}
+
+	return result, nil
 }
 
 func InsertNewComment(
@@ -397,17 +443,17 @@ func GetCommentsByPostId(
 ) ([]model.CommentWithUser, error) {
 	rows, err := conn.Query(ctx,
 		`SELECT uc.comment_id, u.nickname, u.avatar_img, 
-            uc.body, uc.attachments, uc.creation_date,
-  		      uc.votes_amount, uc.reply_id 
+		        uc.body, uc.attachments, uc.creation_date,
+		        uc.votes_amount, uc.reply_id 
 		 FROM users_comments AS uc
 		 JOIN users AS u
 		 ON u.user_id = uc.user_id
 		 WHERE post_id = $1
 		 ORDER BY reply_id DESC`,
-		 postId,
+		postId,
 	)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 	defer rows.Close()
 

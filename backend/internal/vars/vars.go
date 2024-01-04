@@ -43,6 +43,7 @@ var (
 	ErrIncorrectContentLength              = errors.New("27: Incorrect content length.")
 	ErrInternalJsonParsing                 = errors.New("28: Internal json parser error.")
 	ErrInternalMicroserviceRequest         = errors.New("29: Internal microservice request failed.")
+	ErrCommentsDisallowedForThisPost       = errors.New("30: Comments disallowed for this post.")
 
 	// values from env
 	// TODO: rewrite with https://github.com/Netflix/go-env

@@ -67,14 +67,15 @@ type UserToken struct {
 }
 
 type UserPost struct {
-	PostId         int       `json:"post_id"`
-	UserId         int       `json:"user_id"`
-	CreationDate   time.Time `json:"creation_date"`
-	PostType       Post      `json:"post_type"`
-	Body           string    `json:"body"`
-	Attachments    []string  `json:"attachments"`
-	VotesAmount    int       `json:"votes_amount"`
-	CommentsAmount int       `json:"comments_amount"`
+	PostId               int       `json:"post_id"`
+	UserId               int       `json:"user_id"`
+	CreationDate         time.Time `json:"creation_date"`
+	PostType             Post      `json:"post_type"`
+	Body                 string    `json:"body"`
+	Attachments          []string  `json:"attachments"`
+	VotesAmount          int       `json:"votes_amount"`
+	CommentsAmount       int       `json:"comments_amount"`
+	IsCommentsDisallowed bool      `json:"is_comments_disallowed"`
 }
 
 type UserLike struct {

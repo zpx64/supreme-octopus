@@ -132,6 +132,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
+			isCommentsDisallowed, err := db.IsCommentsAllowedForPost(
+				ctx, c, in.PostId,
+			)
+			if err != nil {
+				return err
+			}
+			if isCommentsDisallowed {
+				return vars.ErrCommentsDisallowedForThisPost
+			}
 			id, err = db.InsertNewComment(ctx, c,
 				model.UserComment{
 					UserId:       userId,
@@ -151,8 +160,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Err(err).
 			Msg("an error with database")
 
-		out.Err = vars.ErrWithDb.Error()
-		out.Status = http.StatusInternalServerError
+		if err == vars.ErrCommentsDisallowedForThisPost {
+			out.Err = err.Error()
+			out.Status = http.StatusMethodNotAllowed
+		} else {
+			out.Err = vars.ErrWithDb.Error()
+			out.Status = http.StatusInternalServerError
+		}
 		return
 	}
 

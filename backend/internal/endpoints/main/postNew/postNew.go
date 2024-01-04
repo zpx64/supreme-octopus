@@ -28,10 +28,11 @@ var (
 
 // TODO: disable attachments in model.PostArticle
 type Input struct {
-	AccessToken string     `json:"access_token"  validate:"required,max=256"`
-	PostType    model.Post `json:"post_type"     validate:"required"`
-	Body        string     `json:"body"          validate:"required,min=5"`
-	Attachments []string   `json:"attachments"   validate:"required,max=8"`
+	AccessToken           string     `json:"access_token"  validate:"required,max=256"`
+	PostType              model.Post `json:"post_type"     validate:"required"`
+	Body                  string     `json:"body"          validate:"required,min=5"`
+	Attachments           []string   `json:"attachments"   validate:"required,max=8"`
+	IsCommmentsDisallowed bool       `json:"is_comments_disallowed"`
 }
 
 type Output struct {
@@ -134,11 +135,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		func(c *pgxpool.Conn) error {
 			id, err = db.InsertNewPost(ctx, c,
 				model.UserPost{
-					UserId:       userId,
-					CreationDate: time.Now(),
-					PostType:     in.PostType,
-					Body:         in.Body,
-					Attachments:  in.Attachments,
+					UserId:               userId,
+					CreationDate:         time.Now(),
+					PostType:             in.PostType,
+					Body:                 in.Body,
+					Attachments:          in.Attachments,
+					IsCommentsDisallowed: in.IsCommmentsDisallowed,
 				},
 			)
 			return err
