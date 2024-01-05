@@ -47,7 +47,6 @@ function CreateEntry() {
   const [getPostText, setPostText] = useState('');
   const [getUploadedImagesSRC, setUploadedImagesSRC] = useState([]);
   const [getUploadedImagesFiles, setUploadedImagesFiles] = useState([]);
-  const [getAttachmentsFromCloud, setAttachmentsFromCloud] = useState([]);
 
   const enableArticles  = (e) => {
     setIsArticleEnabled(true);
@@ -80,12 +79,10 @@ function CreateEntry() {
     if (!processedAttachments) {
       notificationStore.addNotification('Images serive isn\'t available', 'err');
     } else {
-      setAttachmentsFromCloud([...processedAttachments]);
-
       if (isArticleEnabled === true) {
-        createPost(1, getPostText, getAttachmentsFromCloud);
+        createPost(1, getPostText, processedAttachments);
       } else {
-        createPost(2, getPostText, getAttachmentsFromCloud);
+        createPost(2, getPostText, processedAttachments);
       }
     }
   }
