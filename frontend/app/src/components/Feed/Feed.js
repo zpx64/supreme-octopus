@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTokens } from 'utils/TokensManagment/TokensManagment';
 
@@ -11,6 +11,7 @@ import CreateEntry from './LeftBar/CreateEntry/CreateEntry.js';
 
 
 function Feed() {
+  const [PostCreateWindow, setPostCreateWindow] = useState(false);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -21,12 +22,12 @@ function Feed() {
   
   return (
     <>
-      <LeftBar />
+      <LeftBar setPostWindowSwitch={setPostCreateWindow} />
       <AccountLink />
       <SearchBar />
       <Scrollbar />
       <Posts />
-      <CreateEntry />
+      { PostCreateWindow ? <CreateEntry /> : "" }
     </>
   )
 }

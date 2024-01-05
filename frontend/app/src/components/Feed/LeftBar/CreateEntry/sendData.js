@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 import base85 from 'base85';
 import { getTokens } from "utils/TokensManagment/TokensManagment"
+import notificationStore from 'utils/Notifications/NotificationsStore';
 
 
 const PadBuffer = (buffer) => {
@@ -13,6 +14,42 @@ const PadBuffer = (buffer) => {
   }
 
   return Buffer.concat([buffer, buf], size + need);
+}
+
+async function createPost(type, text, attachments) {
+    const jsonData = {
+        "access_token": getTokens().access,
+        "post_type": type,
+        "body": text,
+        "attachments": attachments,
+    }
+
+    let postTypeName = null;
+    if (type === 1) {
+        postTypeName = "Article";
+    } else {
+        postTypeName = "Note";
+    }
+    
+    const jsonDataString = JSON.stringify(jsonData);
+    console.log(jsonDataString);
+    notificationStore.addNotification('Running [2/2]: post creation phase...', 'warn');
+    try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_DOMAIN}/api/post_new`, {
+            method: 'POST',
+            body: jsonDataString,
+        })
+
+        const data = await response.json();
+
+        if (data.error === "null") {
+            notificationStore.addNotification(`Post type "${postTypeName}" created`, 'success');
+        } else {
+            notificationStore.addNotification('Creation phase failed', 'err');
+        }
+    } catch(error) {
+        console.log(error);
+    }
 }
 
 async function registerImages(images) {
@@ -41,6 +78,7 @@ async function registerImages(images) {
         const processedImages = await Promise.all(images.map(readFileAsync));
         jsonData.images = processedImages;
         const jsonDataString = JSON.stringify(jsonData);
+        notificationStore.addNotification('Running [1/2]: images uploading phase...', 'warn');
 
         try {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_DOMAIN}/api/post_image`, {
@@ -49,7 +87,13 @@ async function registerImages(images) {
             })
 
             const data = await response.json();
-            console.log(data);
+
+            if (data.error === "null") {
+                return data.writed_ids
+            } else {
+                console.log(data.error);
+                notificationStore.addNotification('Error while processing images', 'err');
+            }
         } catch(error) {
             console.log(error);
         }
@@ -58,4 +102,4 @@ async function registerImages(images) {
     }
 }
 
-export { registerImages }
+export { registerImages, createPost }

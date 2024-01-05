@@ -1,25 +1,28 @@
 import { useState } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { registerImages } from './sendData';
+import notificationStore from 'utils/Notifications/NotificationsStore';
+import { createPost, registerImages } from './sendData';
 
 import './CreateEntry.css';
 import Newspaper from './assets/Newspaper.svg';
 import Note from './assets/Note.svg';
 
-function NoteMode() {
+function NoteMode({ setText }) {
+  const saveText = (e) => {
+    setText(e.target.value);
+  }
+
   return (
     <div className="create-note-window">
-      <textarea name="note" placeholder="Enter Note"></textarea>
+      <textarea name="note" placeholder="Enter Note" onChange={saveText}></textarea>
     </div>
   )
 }
 
-function ArticleMode() {
-  const [renderedMarkdown, setRenderedMarkdown] = useState("");
-
+function ArticleMode({ getText, setText }) {
   const renderMarkdown = (e) => {
-    setRenderedMarkdown(marked.parse(e.target.value));
+    setText(marked.parse(e.target.value));
   }
 
   return (
@@ -33,7 +36,7 @@ function ArticleMode() {
           <textarea name="markdown" onChange={renderMarkdown} placeholder="Enter Markdown"></textarea>
         </div>
         <div className="create-article-separator"></div>
-        <div className="create-article-rendered" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(renderedMarkdown)}}></div>
+        <div className="create-article-rendered" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(getText)}}></div>
       </div>
     </div>
   )
@@ -41,8 +44,10 @@ function ArticleMode() {
 
 function CreateEntry() {
   const [isArticleEnabled, setIsArticleEnabled] = useState(true);
+  const [getPostText, setPostText] = useState('');
   const [getUploadedImagesSRC, setUploadedImagesSRC] = useState([]);
   const [getUploadedImagesFiles, setUploadedImagesFiles] = useState([]);
+  const [getAttachmentsFromCloud, setAttachmentsFromCloud] = useState([]);
 
   const enableArticles  = (e) => {
     setIsArticleEnabled(true);
@@ -69,8 +74,20 @@ function CreateEntry() {
     setUploadedImagesSRC([...getUploadedImagesSRC, ...newImages]);
   }
 
-  const uploadData = () => {
-    registerImages(getUploadedImagesFiles);
+  const uploadData = async () => {
+    const processedAttachments = await registerImages(getUploadedImagesFiles);
+
+    if (!processedAttachments) {
+      notificationStore.addNotification('Images serive isn\'t available', 'err');
+    } else {
+      setAttachmentsFromCloud([...processedAttachments]);
+
+      if (isArticleEnabled === true) {
+        createPost(1, getPostText, getAttachmentsFromCloud);
+      } else {
+        createPost(2, getPostText, getAttachmentsFromCloud);
+      }
+    }
   }
 
   return (
@@ -78,7 +95,7 @@ function CreateEntry() {
       <div className="window-create-note">
         <div className="window-header">
           <p>{ isArticleEnabled ? "entry / createArticle" : "entry / createNote" }</p>
-          <a href="https://google.com/"> </a>
+          <a href=''> </a>
         </div>
         <div className="window-area display-flex">
           <div className="create-entry-vertical-bar">
@@ -110,7 +127,7 @@ function CreateEntry() {
             }
             <button className="entry-upload-button" onClick={uploadData}>Upload</button>
           </div>
-          { isArticleEnabled ? <ArticleMode /> : <NoteMode />  }
+          { isArticleEnabled ? <ArticleMode setText={setPostText} getText={getPostText} /> : <NoteMode setText={setPostText} />  }
         </div>
       </div>
     </div>
