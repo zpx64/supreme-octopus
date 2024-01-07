@@ -4,7 +4,7 @@ import { getTokens } from "utils/TokensManagment/TokensManagment";
 async function getPosts() {
     const jsonData = {
         "access_token": getTokens().access,
-        "offset": 9,
+        "offset": 0,
         "limit": 35
     }
 
