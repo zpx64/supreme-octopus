@@ -92,11 +92,15 @@ func randByteSliceFallback(bytes []byte) error {
 	// in go i cant generate correct random number
 	// without error and return constant value i cant too
 	// because it can rewrite another user data
+
+	var err error
 	for i := 0; i < retryesAmount; i++ {
-		_, err := randFunc(bytes)
-		if err == nil {
-			break
+		_, err = randFunc(bytes)
+		if err != nil {
+			continue
 		}
+	}
+	if err != nil {
 		return ErrRandBytesGen
 	}
 	return nil
