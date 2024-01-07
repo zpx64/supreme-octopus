@@ -1,10 +1,10 @@
 import notificationStore from "utils/Notifications/NotificationsStore";
-import { getTokens, removeTokens, setTokens } from "utils/TokensManagment/TokensManagment";
+import { getTokens } from "utils/TokensManagment/TokensManagment";
 
 async function getPosts() {
     const jsonData = {
         "access_token": getTokens().access,
-        "offset": 0,
+        "offset": 9,
         "limit": 35
     }
 

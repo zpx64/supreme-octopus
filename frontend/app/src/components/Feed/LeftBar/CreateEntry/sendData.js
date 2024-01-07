@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import Buffer from 'buffer';
 import base85 from 'base85';
 import { getTokens } from "utils/TokensManagment/TokensManagment"
 import notificationStore from 'utils/Notifications/NotificationsStore';

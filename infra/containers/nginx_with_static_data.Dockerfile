@@ -1,13 +1,13 @@
-FROM node:21.2-bookworm as builder
+FROM imbios/bun-node as builder
 ENV NODE_ENV=production
 
 WORKDIR /app
 
 COPY ./frontend/app/package.json ./
-RUN npm install
+RUN bun install
 
 COPY ./frontend/app/ ./
-RUN npx react-scripts build
+RUN bun run build
 
 FROM nginx:1.25.0
 COPY --from=builder /app/build /static

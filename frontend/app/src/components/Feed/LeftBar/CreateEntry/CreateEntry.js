@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { marked } from 'marked';
 import insane from 'insane';
-import DOMPurify from 'dompurify';
 import notificationStore from 'utils/Notifications/NotificationsStore';
 import { createPost, registerImages } from './sendData';
 
@@ -116,7 +115,7 @@ function CreateEntry() {
       <div className="window-create-note">
         <div className="window-header">
           <p>{ isArticleEnabled ? "entry / createArticle" : "entry / createNote" }</p>
-          <a href=''> </a>
+          <a href='/'> </a>
         </div>
         <div className="window-area display-flex">
           <div className="create-entry-vertical-bar">
