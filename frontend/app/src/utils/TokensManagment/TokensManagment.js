@@ -11,8 +11,10 @@ const setTokens = (accessToken, refreshToken) => {
 const removeTokens = (token) => {
   if (token === access_token_name) {
     Cookies.remove(access_token_name);
-  }
-  if (token === refresh_token_name) {
+  } else if (token === refresh_token_name) {
+    Cookies.remove(refresh_token_name);
+  } else {
+    Cookies.remove(access_token_name);
     Cookies.remove(refresh_token_name);
   }
 }

@@ -205,3 +205,8 @@
   width: 79px;
   object-fit: cover;
 }
+
+.markdown-sandboxed-image {
+  max-height: 500px;
+  max-width: 100%;
+}

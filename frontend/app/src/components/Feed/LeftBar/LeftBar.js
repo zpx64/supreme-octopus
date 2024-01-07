@@ -1,16 +1,16 @@
 import './LeftBar.css';
-import NewEntry_Icon from './assets/NewEntry.svg';
+import NewEntry_Icon from './assets/NewEntryIcon';
 
-function LeftBar({ setPostWindowSwitch }) {
+function LeftBar({ setPostWindowSwitch, PostWindowSwitch }) {
   const SwitchPostCreationWindow = () => {
-    setPostWindowSwitch(true);
+    setPostWindowSwitch(!PostWindowSwitch);
   }
 
   return (
     <div className="leftbar-wrapper">
       <div className="leftbar">
-        <button onClick={SwitchPostCreationWindow}>
-          <img src={NewEntry_Icon} alt="" />
+        <button className={PostWindowSwitch ? "leftbar-active-button" : "leftbar-inactive-button" } onClick={SwitchPostCreationWindow}>
+          <NewEntry_Icon fillColor={PostWindowSwitch ? "white" : "black"} />
         </button>
         <div className="leftbar-sep"></div>
         <button>

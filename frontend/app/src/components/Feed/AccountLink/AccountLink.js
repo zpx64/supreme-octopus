@@ -5,7 +5,7 @@ import './AccountLink.css'
 function AccountLink() {
   return (
     <>
-      <div className="accountIconWrapper">
+      <div className="account-icon-wrapper">
         <div>
           <img src={User} alt="" />
         </div>

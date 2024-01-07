@@ -1,22 +1,24 @@
-.accountIconWrapper {
+.account-icon-wrapper {
   display: flex;
   height: 100px;
   width: 100px;
   position: fixed;
   top: 0;
   right: 0;
+  z-index: 1;
 }
 
-.accountIconWrapper > div {
+.account-icon-wrapper > div {
   display: flex;
   height: 65px;
   width: 65px;
   margin: auto;
+  background-color: white;
   border-radius: 100%;
   border: 2.75px solid #000;
   box-shadow: 2.4px 2.4px 0px 0px #000;
 }
 
-.accountIconWrapper > div > img {
+.account-icon-wrapper > div > img {
   margin: auto;
 }

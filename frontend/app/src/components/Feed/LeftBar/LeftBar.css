@@ -5,29 +5,27 @@
   position: fixed;
   margin-left: 20px;
   top: 0;
+  z-index: 1;
 }
 
 .leftbar {
   width: 75px;
   margin: auto;
+  background-color: white;
   border-radius: 12px;
   border: 2px solid #000;
   box-shadow: 2px 2px 0px 0px #000; 
 }
 
-.leftbar > button {
+.leftbar > button:not(.leftbar-active-button) {
   height: 48px;
   width: 48px;
   margin: 10px;
-  background: white;
+  background-color: white;
   border-radius: 100%;
+  z-index: 1;
   border: 2px solid #000; 
   box-shadow: 2px 2px 0px 0px #000;
-}
-
-.leftbar > button:active {
-  box-shadow: none;
-  scale: 0.95;
 }
 
 .leftbar-sep {
@@ -45,4 +43,13 @@
 
 .leftbar > button  > img {
   margin-top: 4px;
+}
+
+.leftbar-active-button {
+  height: 48px;
+  width: 48px;
+  margin: 10px;
+  background-color: black;
+  border-radius: 100%;
+  border: 2px solid #000; 
 }

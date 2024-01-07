@@ -22,7 +22,7 @@ function Feed() {
   
   return (
     <>
-      <LeftBar setPostWindowSwitch={setPostCreateWindow} />
+      <LeftBar setPostWindowSwitch={setPostCreateWindow} PostWindowSwitch={PostCreateWindow} />
       <AccountLink />
       <SearchBar />
       <Scrollbar />

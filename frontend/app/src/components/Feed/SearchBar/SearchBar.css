@@ -2,22 +2,23 @@
   --feed-search-bar-padding: 10px;
 }
 
-.feedSearchBarContainer {
+.feed-search-bar-container {
   height: 45px;
   width: 100%;
   position: fixed;
   margin: 26.6px auto 0 auto;
   top: 0;
+  z-index: 1;
 }
 
-.feedSearchBar {
+.feed-search-bar {
   height: 45px;
   width: 512px;
   margin: auto;
   border-radius: 12px;
 }
 
-.feedSearchBar > input {
+.feed-search-bar > input {
   height: calc(45px - calc(calc(var(--feed-search-bar-padding) * 2) + 5px));
   width: calc(100% - calc(calc(var(--feed-search-bar-padding) * 2) + 5px));
   padding: var(--feed-search-bar-padding);

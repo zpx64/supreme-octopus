@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { marked } from 'marked';
+import insane from 'insane';
 import DOMPurify from 'dompurify';
 import notificationStore from 'utils/Notifications/NotificationsStore';
 import { createPost, registerImages } from './sendData';
@@ -7,6 +8,8 @@ import { createPost, registerImages } from './sendData';
 import './CreateEntry.css';
 import Newspaper from './assets/Newspaper.svg';
 import Note from './assets/Note.svg';
+
+import SanitizeRules from './Sanitize.json';
 
 function NoteMode({ setText }) {
   const saveText = (e) => {
@@ -21,8 +24,21 @@ function NoteMode({ setText }) {
 }
 
 function ArticleMode({ getText, setText }) {
+  const processHTML = (html) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    const images = doc.querySelectorAll('img');
+
+    images.forEach(function(image) {
+        image.classList.add('markdown-sandboxed-image');
+    });
+
+    return doc.body.innerHTML;
+}
+  
   const renderMarkdown = (e) => {
-    setText(marked.parse(e.target.value));
+    setText(marked.parse(insane(e.target.value, SanitizeRules)));
   }
 
   return (
@@ -36,7 +52,7 @@ function ArticleMode({ getText, setText }) {
           <textarea name="markdown" onChange={renderMarkdown} placeholder="Enter Markdown"></textarea>
         </div>
         <div className="create-article-separator"></div>
-        <div className="create-article-rendered" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(getText)}}></div>
+        <div className="create-article-rendered" dangerouslySetInnerHTML={{__html: processHTML(getText) }}></div>
       </div>
     </div>
   )
@@ -74,15 +90,23 @@ function CreateEntry() {
   }
 
   const uploadData = async () => {
-    const processedAttachments = await registerImages(getUploadedImagesFiles);
+    if (getUploadedImagesFiles.length > 0) {
+      const processedAttachments = await registerImages(getUploadedImagesFiles);
 
-    if (!processedAttachments) {
-      notificationStore.addNotification('Images serive isn\'t available', 'err');
+      if (!processedAttachments) {
+        notificationStore.addNotification('Images serive isn\'t available', 'err');
+      } else {
+        if (isArticleEnabled === true) {
+          createPost(1, getPostText, processedAttachments);
+        } else {
+          createPost(2, getPostText, processedAttachments);
+        }
+      }
     } else {
       if (isArticleEnabled === true) {
-        createPost(1, getPostText, processedAttachments);
+        createPost(1, getPostText, []);
       } else {
-        createPost(2, getPostText, processedAttachments);
+        createPost(2, getPostText, []);
       }
     }
   }
