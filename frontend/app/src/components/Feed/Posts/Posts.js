@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import { getPosts } from './getPosts';
+
 import './Posts.css';
-import User from 'assets/images/User.svg';
+import UserIcon from 'assets/images/User.svg';
+import UpVoteIcon from './assets/UpVote.js';
+import DownVoteIcon from './assets/DownVote.js';
+import CommentsIcon from './assets/Comments.svg';
 
 function Posts() {
   const [postsList, setPostsList] = useState([]);
@@ -34,7 +38,7 @@ function Posts() {
           <div className="post-window" key={post.id}>
             <div className="post-header">
               <p>{post.type === 1 ? `article / ${post.nickname}` : `note / ${post.nickname}`}</p>
-              <img src={post.avatar_img === "default" ? User : `${process.env.REACT_APP_BACKEND_DOMAIN}/images/${post.avatar_img}`} alt="" />
+              <img src={post.avatar_img === "default" ? UserIcon : `${process.env.REACT_APP_BACKEND_DOMAIN}/images/${post.avatar_img}`} alt="" />
             </div>
             {post.type === 1 ?
               <div className="post-text-area" dangerouslySetInnerHTML={{__html: marked.parse(post.body)}}></div>
@@ -47,6 +51,18 @@ function Posts() {
                 </div>
               </>
             }
+            <div className="post-actions">
+              <div>
+                <button><UpVoteIcon className="post-action-vote" /></button>
+                <div className="post-action-separator"></div>
+                <button><DownVoteIcon className="post-action-vote" /></button>
+                <p>{post.votes_amount}</p>
+              </div>
+              <div>
+                <img src={CommentsIcon} alt="" />
+                <p>{post.comments_amount}</p>
+              </div>
+            </div>
           </div>
         ))}
       </div>

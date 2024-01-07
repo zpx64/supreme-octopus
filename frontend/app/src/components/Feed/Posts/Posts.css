@@ -30,8 +30,9 @@
 .post-header > img {
   height: 18px;
   width: 18px;
-  margin: 6px;
+  margin: 8px;
   margin-left: auto;
+  margin-right: 10px;
 }
 
 .post-text-area {
@@ -55,4 +56,58 @@
   border: 2.4px solid #000;
   filter: drop-shadow(2.4px 2.4px 0px #000);
   object-fit: cover;
+}
+
+.post-actions {
+  display: flex;
+  margin-bottom: 10px;
+  margin-left: 10px;
+}
+
+.post-actions > div {
+  display: flex;
+  height: 30px;
+  margin-right: 10px;
+  background-color: white;
+  border-radius: 4px;
+  border: 2.4px solid #000;
+  filter: drop-shadow(2.4px 2.4px 0px #000);
+}
+
+.post-actions > div > img {
+  margin: 2px;
+  user-select: none;
+}
+
+.post-actions > div > button {
+  display: flex;
+  height: 100%;
+  width: 30px;
+}
+
+.post-actions > div > button:active {
+  background-color: black;
+}
+
+.post-actions > div > p {
+  height: 25px;
+  min-width: 30px;
+  margin: auto;
+  text-align: center;
+  line-height: 30px;
+}
+
+.post-actions > div > button > svg {
+  height: 25px;
+  width: 25px;
+  margin: auto 2px;
+  object-fit: cover;
+  user-select: none;
+}
+
+.post-action-separator {
+  height: 17px;
+  width: 2px;
+  margin: auto;
+  background-color: black;
 }
