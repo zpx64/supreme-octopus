@@ -84,6 +84,17 @@ function returnValidationScheme(action) {
 }
 
 
+function generateDeviceId() {
+  const userAgent = window.navigator.userAgent;
+
+  const rndMin = 1000000000;
+  const rndMax = 9999999999;
+  const userId = Math.floor(Math.random() * (rndMax - rndMin)) + rndMin;
+
+  const result = userAgent + "_" + userId;
+  
+  return result;
+}
 
 async function sendSignUpDataToServer(formData, fullNameEnabled) {
   const sendData = async (jsonData) => {
@@ -99,7 +110,6 @@ async function sendSignUpDataToServer(formData, fullNameEnabled) {
       }
 
       const data = await response.json();
-      console.log(data);
 
       if (data.error !== "null") {
         if (data.error.includes("Already in db")) {
@@ -111,6 +121,19 @@ async function sendSignUpDataToServer(formData, fullNameEnabled) {
 
       } else {
         notificationStore.addNotification("Registration successful", "success");
+        console.log(formData);
+
+        const newFormData = {
+          email: formData.email,
+          password: formData.password
+        }
+
+        const loginResponse = sendLoginDataToServer({email: formData.email, password: formData.password});
+
+        if (loginResponse == true) {
+          notificationStore.addNotification("Failed to login automatically.", "err");
+        }
+
         return true;
       }
     } catch(err) {
@@ -158,18 +181,6 @@ async function sendSignUpDataToServer(formData, fullNameEnabled) {
       return false;
     }
   }
-}
-
-function generateDeviceId() {
-  const userAgent = window.navigator.userAgent;
-
-  const rndMin = 1000000000;
-  const rndMax = 9999999999;
-  const userId = Math.floor(Math.random() * (rndMax - rndMin)) + rndMin;
-
-  const result = userAgent + "_" + userId;
-  
-  return result;
 }
 
 async function sendLoginDataToServer(formData) {

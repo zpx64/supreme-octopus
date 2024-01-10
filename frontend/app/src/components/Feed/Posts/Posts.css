@@ -1,8 +1,12 @@
 .posts-container {
   width: 620px;
-  min-height: 100vh;
   margin: auto;
   margin-top: 125px;
+}
+
+.posts-container p, button {
+  margin: 0;
+  padding: 0;
 }
 
 .post-window {

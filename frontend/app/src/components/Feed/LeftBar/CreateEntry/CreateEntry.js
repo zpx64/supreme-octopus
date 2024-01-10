@@ -8,7 +8,7 @@ import './CreateEntry.css';
 import Newspaper from './assets/Newspaper.svg';
 import Note from './assets/Note.svg';
 
-import SanitizeRules from './Sanitize.json';
+import SanitizeRules from 'utils/SanitizeRules/Sanitize.json';
 
 function NoteMode({ setText }) {
   const saveText = (e) => {

@@ -1,4 +1,4 @@
-#page-bg {
+#static-page-bg {
   display: inline-block;
   height: 200vh;
   width: 200vw;
@@ -7,16 +7,17 @@
   background: url("./img.svg") repeat;
   background-size: 0.5%;
   transform: rotate(25deg);
-  animation: loading-slide 150s linear infinite;
+  opacity: 1;
+  animation: reveal 3s;
   scale: 2;
   z-index: -1;
 }
 
-@keyframes loading-slide {
+@keyframes reveal {
   from {
-    background-position: top left;
+    opacity: 0;
   }
   to {
-    background-position: bottom right;
+    opacity: 1;
   }
 }

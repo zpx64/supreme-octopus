@@ -4,7 +4,7 @@
   --notif-red-color: #E75D5D;
 }
 
-.notificationContainer {
+.notification-container {
   width: 100px;
   position: fixed;
   right: 0;
@@ -27,18 +27,19 @@
 }
 
 .notification > p {
+  margin: 0;
   padding-left: 10px;
   padding-right: 10px;
   padding-bottom: 10px;
   font-size: 1.15rem
 }
 
-.notificationHeader {
+.notification-header {
   display: flex;
   height: 40px;
 }
 
-.notificationHeader > div {
+.notification-header > div {
   height: 15px;
   width: 15px;
   margin-top: 8px;
@@ -47,7 +48,7 @@
   border-radius: 100%;
 }
 
-.notificationHeader > button {
+.notification-header > button {
   height: 20px;
   width: 20px;
   margin-left: auto;
@@ -58,19 +59,19 @@
   background: none;
 }
 
-.notificationStatusGreen {
+.notification-status-green {
   background-color: var(--notif-green-color);
 }
 
-.notificationStatusYellow {
+.notification-status-yellow {
   background-color: var(--notif-yellow-color);
 }
 
-.notificationStatusRed {
+.notification-status-red {
   background-color: var(--notif-red-color);
 }
 
-.notificationHeader > button:hover {
+.notification-header > button:hover {
   background-color: black;
 }
 

@@ -3,7 +3,7 @@ import './Background.css';
 function Background() {
   return (
     <>
-      <div id="pageBG"></div>
+      <div id="page-bg"></div>
     </>
   );
 }

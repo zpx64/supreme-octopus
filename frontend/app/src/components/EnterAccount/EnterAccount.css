@@ -4,21 +4,13 @@
   --input-enteraccount-padding: 10px;
 }
 
-p {
+.enter-account-window-container {
+  height: 100vh;
+}
+
+.enter-account-window-container p, button, label {
   margin: 0;
   user-select: none;
-}
-
-button {
-  padding: 0;
-}
-
-label {
-  user-select: none;
-}
-
-.enterAccountWindowContainer {
-  height: 100vh;
 }
 
 .window-login {

@@ -18,7 +18,7 @@ function Feed() {
     if (!getTokens().access || !getTokens().refresh) {
       navigate("/login");
     }
-  }, [navigate]);
+  }, []);
   
   return (
     <>

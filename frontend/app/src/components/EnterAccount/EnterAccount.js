@@ -29,13 +29,13 @@ function SignUpScreen({onLoginClick}) {
   const handleSignUp = async(e) => {
     const result = await sendSignUpDataToServer(formData, fullNameEnabled);
     if (result) {
-      navigator('/login');
+      navigator('/');
     }
   }
 
   return (
     <>
-      <div className="enterAccountWindowContainer">
+      <div className="enter-account-window-container">
         <div className="window-signup">
           <div className="window-header">
             <p>account / signup</p>
@@ -87,7 +87,6 @@ function LoginScreen({onSignUpClick}) {
 
   const handleLogin = async() => {
     const result = await sendLoginDataToServer(formData);
-    console.log(result);
     if (result) {
       navigator('/');
     }
@@ -95,7 +94,7 @@ function LoginScreen({onSignUpClick}) {
   
   return (
     <>
-      <div className="enterAccountWindowContainer">
+      <div className="enter-account-window-container">
         <div className="window-login">
           <div className="window-header">
             <p>account / login</p>

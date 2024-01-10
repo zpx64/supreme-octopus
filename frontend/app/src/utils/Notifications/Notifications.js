@@ -7,11 +7,11 @@ const NotificationBuilder = ({ message, status, removeNotification, id }) => {
   const getStatusClass = () => {
     switch (status) {
       case 'success':
-        return 'notificationStatusGreen';
+        return 'notification-status-green';
       case 'warn':
-        return 'notificationStatusYellow';
+        return 'notification-status-yellow';
       default:
-        return 'notificationStatusRed';
+        return 'notification-status-red';
     };
   };
 
@@ -19,9 +19,9 @@ const NotificationBuilder = ({ message, status, removeNotification, id }) => {
   
   return (
     <div id={id} className="notification">
-      <div className="notificationHeader">
+      <div className="notification-header">
         <div className={notificationStatus}></div>
-        <button className="notificationCloseButton" onClick={removeNotification}></button>
+        <button className="notification-close-button" onClick={removeNotification}></button>
       </div>
       <p>{message}</p>
     </div>
@@ -36,7 +36,7 @@ const Notifications = observer(() => {
   let sliced = notificationStore.notifications.slice(0, 5);
 
   return (
-    <div className="notificationContainer">
+    <div className="notification-container">
       {sliced.map(notification => (
         <NotificationBuilder 
           key={notification.id}

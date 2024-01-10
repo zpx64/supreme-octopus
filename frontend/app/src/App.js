@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Feed from './components/Feed/Feed';
 import EnterAccount from './components/EnterAccount/EnterAccount';
 import Background from './components/Background/Background';
+import StaticBackground from './components/StaticBackground/StaticBackground';
 import Notifications from 'utils/Notifications/Notifications';
 
 import './App.css';
@@ -14,7 +15,11 @@ function Page() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Feed />
+      element:
+      <>
+        <Feed />
+        <StaticBackground />
+      </>
     },
     {
       path: "/login",

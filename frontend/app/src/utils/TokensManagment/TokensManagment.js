@@ -28,32 +28,33 @@ const getTokens = () => {
   return cookies;
 }
 
-const fetchTokens = async () => {
-  const cookies = {
-    access: "asd",
-    refresh: "123",
+const refreshTokens = async () => {
+  const jsonData = {
+    access_token: getTokens().access,
+    refresh_token: getTokens().refresh,
   }
 
-  const jsonData = JSON.stringify(cookies);
+  const jsonDataString = JSON.stringify(jsonData);
   
   try {
-    const response = await fetch('http://localhost:80/api/refresh', {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_DOMAIN}/api/refresh`, {
       method: 'POST',
-      body: jsonData,
+      body: jsonDataString,
     });
 
     const data = await response.json();
-
-    if (data[1] === "null") {
-      setTokens(data[0], data[2]);
-    } else {
-      console.log("Error on tokenFetch");
-    }
     console.log(data);
+
+    if (data.error === "null") {
+      setTokens(data[0], data[1]);
+      return "success"
+    } else {
+      return null
+    }
 
   } catch(err) {
     console.log(err);
   }
 }
 
-export { setTokens, removeTokens, getTokens, fetchTokens }
+export { setTokens, removeTokens, getTokens, refreshTokens }

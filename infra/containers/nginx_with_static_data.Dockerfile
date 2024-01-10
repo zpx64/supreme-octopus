@@ -1,4 +1,4 @@
-FROM imbios/bun-node as builder
+FROM imbios/bun-node:21-debian as builder
 ENV NODE_ENV=production
 
 WORKDIR /app

@@ -17,16 +17,15 @@ async function getPosts() {
         })
 
         const data = await response.json();
+        console.log(data);
 
         if (data.error === "null") {
             return data.posts;
         } else {
-            console.log(data.error);
-            notificationStore.addNotification('Error while fetching feed', 'err');
             return null;
         }
     } catch(error) {
-        console.log(error);
+        console.error(error);
         return null;
     }
 }
