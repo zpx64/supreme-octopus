@@ -1,4 +1,4 @@
-package postVote
+package getPost
 
 import (
 	"context"
@@ -26,14 +26,29 @@ var (
 	dbConn *pgxpool.Pool
 )
 
+// TODO: disable attachments in model.PostArticle
 type Input struct {
-	AccessToken string           `json:"access_token"  validate:"required,max=256"`
-	PostId      int              `json:"post_id"       validate:"required"`
-	Action      model.VoteAction `json:"action"        validate:"required,min=1,max=2"`
+	AccessToken string `json:"access_token" validate:"required,min=5,max=100"`
+	Offset      uint   `json:"offset"`
+	Limit       uint   `json:"limit"        validate:"required,max=35"`
+}
+
+type Post struct {
+	Nickname             string           `json:"nickname"`
+	AvatarImg            string           `json:"avatar_img"`
+	Id                   int              `json:"id"`
+	CreationDate         time.Time        `json:"creation_date"`
+	Type                 model.Post       `json:"type"`
+	Body                 string           `json:"body"`
+	Attachments          []string         `json:"attachments"`
+	VotesAmount          int              `json:"votes_amount"`
+	VoteAction           model.VoteAction `json:"vote_action"`
+	CommentsAmount       int              `json:"comments_amount"`
+	IsCommentsDisallowed bool             `json:"is_comments_disallowed"`
 }
 
 type Output struct {
-	LikeId int    `json:"like_id"`
+	Posts  []Post `json:"posts"`
 	Err    string `json:"error"`
 	Status int    `json:"-"`
 }
@@ -83,6 +98,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		Status: http.StatusOK,
 	}
 
+	log.Trace().Interface("in", in).Send()
+
 	defer func() {
 		utils.WriteJsonAndStatusInRespone(w, &out, out.Status)
 	}()
@@ -108,7 +125,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, err := auth.GetUserIdByAccessToken(accessTokenUint)
+	userId, err := auth.GetUserIdByAccessTokenWithDefaultToken(accessTokenUint)
 	if err != nil {
 		log.Warn().Err(err).Msg("error with access token")
 
@@ -117,8 +134,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentTime := time.Now()
-
 	ctx, cancel := context.WithTimeout(
 		r.Context(),
 		time.Duration(vars.TimeoutSeconds)*time.Second,
@@ -126,15 +141,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var (
-		id int
+		posts []model.UserNPost
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
-			id, err = db.VotePost(ctx, c,
-				userId,
-				in.PostId,
-				in.Action,
-				currentTime,
+			posts, err = db.ListPosts(ctx, c,
+				in.Offset, in.Limit,
 			)
 			return err
 		},
@@ -144,16 +156,55 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Err(err).
 			Msg("an error with database")
 
-		if err == vars.ErrNotInDb {
-			out.Err = err.Error()
-		} else {
-			out.Err = vars.ErrWithDb.Error()
-		}
+		out.Err = vars.ErrWithDb.Error()
 		out.Status = http.StatusInternalServerError
 		return
 	}
 
-	out.LikeId = id
+	voteActions := make([]model.VoteAction, len(posts))
+	if userId != 0 {
+		err = dbConn.AcquireFunc(ctx,
+			func(c *pgxpool.Conn) error {
+				// TODO: optimize without loop
+				for i, e := range posts {
+					voteAction, err := db.IsPostVoted(ctx, c,
+						userId, e.Post.PostId,
+					)
+					if err != nil {
+						return err
+					}
+					voteActions[i] = voteAction
+				}
+				return nil
+			},
+		)
+		if err != nil {
+			log.Warn().
+				Err(err).
+				Msg("an error with database")
+
+			out.Err = vars.ErrWithDb.Error()
+			out.Status = http.StatusInternalServerError
+			return
+		}
+	}
+
+	out.Posts = make([]Post, len(posts))
+	for i, e := range posts {
+		out.Posts[i] = Post{
+			Nickname:             e.User.Nickname,
+			AvatarImg:            e.User.AvatarImg,
+			Id:                   e.Post.PostId,
+			CreationDate:         e.Post.CreationDate,
+			Type:                 e.Post.PostType,
+			Body:                 e.Post.Body,
+			Attachments:          e.Post.Attachments,
+			VotesAmount:          e.Post.VotesAmount,
+			VoteAction:           voteActions[i],
+			CommentsAmount:       e.Post.CommentsAmount,
+			IsCommentsDisallowed: e.Post.IsCommentsDisallowed,
+		}
+	}
 
 	log.Debug().
 		Interface("input_json", in).

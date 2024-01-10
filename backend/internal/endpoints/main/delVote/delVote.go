@@ -1,4 +1,4 @@
-package postVote
+package delVote
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/zpx64/supreme-octopus/internal/auth"
 	"github.com/zpx64/supreme-octopus/internal/db"
-	"github.com/zpx64/supreme-octopus/internal/model"
 	"github.com/zpx64/supreme-octopus/internal/utils"
 	"github.com/zpx64/supreme-octopus/internal/vars"
 
@@ -27,13 +26,11 @@ var (
 )
 
 type Input struct {
-	AccessToken string           `json:"access_token"  validate:"required,max=256"`
-	PostId      int              `json:"post_id"       validate:"required"`
-	Action      model.VoteAction `json:"action"        validate:"required,min=1,max=2"`
+	AccessToken string `json:"access_token"  validate:"required,max=256"`
+	PostId      int    `json:"post_id"       validate:"required"`
 }
 
 type Output struct {
-	LikeId int    `json:"like_id"`
 	Err    string `json:"error"`
 	Status int    `json:"-"`
 }
@@ -117,24 +114,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentTime := time.Now()
-
 	ctx, cancel := context.WithTimeout(
 		r.Context(),
 		time.Duration(vars.TimeoutSeconds)*time.Second,
 	)
 	defer cancel()
 
-	var (
-		id int
-	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
-			id, err = db.VotePost(ctx, c,
-				userId,
+			err = db.RemovePostVote(ctx, c,
 				in.PostId,
-				in.Action,
-				currentTime,
+				userId,
 			)
 			return err
 		},
@@ -152,8 +142,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		out.Status = http.StatusInternalServerError
 		return
 	}
-
-	out.LikeId = id
 
 	log.Debug().
 		Interface("input_json", in).

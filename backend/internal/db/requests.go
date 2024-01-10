@@ -288,6 +288,24 @@ func IsPostVoted(
 	return voteType, nil
 }
 
+func IsPostExists(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	postId int,
+) (bool, error) {
+	var existsPost bool
+	err := conn.QueryRow(ctx,
+		`SELECT EXISTS(SELECT 1 FROM users_posts
+		 WHERE post_id = $1)`,
+		postId,
+	).Scan(&existsPost)
+	if err != nil {
+		return false, err
+	}
+
+	return existsPost, nil
+}
+
 func VotePost(
 	ctx context.Context,
 	conn *pgxpool.Conn,
@@ -302,12 +320,7 @@ func VotePost(
 	}
 	defer tx.Rollback(ctx)
 
-	var existsPost bool
-	err = tx.QueryRow(ctx,
-		`SELECT EXISTS(SELECT 1 FROM users_posts
-		 WHERE post_id = $1)`,
-		postId,
-	).Scan(&existsPost)
+	existsPost, err := IsPostExists(ctx, conn, postId)
 	if err != nil {
 		return 0, err
 	}
@@ -391,6 +404,67 @@ func VotePost(
 		return 0, err
 	}
 	return id, nil
+}
+
+func RemovePostVote(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	postId int,
+	userId int,
+) error {
+	postExists, err := IsPostExists(ctx, conn, postId)
+	if err != nil {
+		return err
+	}
+	if !postExists {
+		return vars.ErrNotInDb
+	}
+
+	var voteAction model.VoteAction
+	err = conn.QueryRow(ctx,
+		`SELECT vote_type FROM users_likes
+		 WHERE post_id = $1 AND user_id = $2`,
+		postId, userId,
+	).Scan(&voteAction)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return vars.ErrNotInDb
+		}
+		return err
+	}
+
+	recoveredVotes := 0
+	if voteAction == model.VoteUpvote {
+		recoveredVotes = -1
+	} else if voteAction == model.VoteDownvote {
+		recoveredVotes = 1
+	}
+
+	_, err = conn.Exec(ctx,
+		`UPDATE users_posts 
+		 SET votes_amount = votes_amount + $1
+		 WHERE post_id = $2`,
+		recoveredVotes, postId,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return vars.ErrNotInDb
+		}
+		return err
+	}
+
+	cmdTag, err := conn.Exec(ctx,
+		`DELETE FROM users_likes 
+		 WHERE post_id = $1 AND user_id = $2`,
+		postId, userId,
+	)
+	if cmdTag.RowsAffected() == 0 {
+		return vars.ErrNotInDb
+	}
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func IsCommentsAllowedForPost(
