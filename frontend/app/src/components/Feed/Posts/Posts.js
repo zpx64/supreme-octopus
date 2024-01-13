@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import insane from 'insane';
 import { getPosts } from './getPosts';
-import { sendVoteData } from './processVote';
+import { sendRemoveVote, sendVoteData } from './processVote';
+import { UpVoteButton, DownVoteButton } from './postsInteractions';
 import SanitizeRules from 'utils/SanitizeRules/Sanitize.json';
 import { refreshTokens } from 'utils/TokensManagment/TokensManagment';
-import notificationStore from 'utils/Notifications/NotificationsStore';
+import notificationStore from 'utils/Notifications/notificationsStore';
+import { NOTIFICATIONS } from 'utils/Notifications/notificationConstants';
 
 import './Posts.css';
 import UserIcon from 'assets/images/User.svg';
-import UpVoteIcon from './assets/UpVote.js';
-import DownVoteIcon from './assets/DownVote.js';
 import CommentsIcon from './assets/Comments.svg';
 
 function Posts() {
@@ -19,9 +19,10 @@ function Posts() {
   const navigate = useNavigate();
 
   const postAction = {
-    UpVote: 1,
-    DownVote: 2
+    Increase: 1,
+    Decrease: 2,
   }
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -53,7 +54,7 @@ function Posts() {
     };
 
     fetchPosts();
-  }, [])
+  }, [navigate])
 
   const processBody = (body) => {
     const parser = new DOMParser();
@@ -68,13 +69,19 @@ function Posts() {
     return insane(doc.body.innerHTML, SanitizeRules)
   }
 
-  const handleVoteUpdate = (action, postId) => {
+  const handleVoteUpdate = (postId, action, size) => {
+    if (!size) {
+      size = 1;
+    }
+
     const updatedPosts = postsList.map(post => {
       if (post.id === postId) {
-        if (action == 1) {
-          return { ...post, votes_amount: post.votes_amount + 1 };
-        } else if (action == 2) {
-          return { ...post, votes_amount: post.votes_amount - 1 };
+        if (action === 1) {
+          console.log(`[Post ID: ${postId}] Votes amount increased on the client side`);
+          return { ...post, votes_amount: post.votes_amount + size };
+        } else if (action === 2) {
+          console.log(`[Post ID: ${postId}] Votes amount decreased on the client side`);
+          return { ...post, votes_amount: post.votes_amount - size };
         }
       }
       return post;
@@ -83,26 +90,94 @@ function Posts() {
     setPostsList(updatedPosts);
   }
 
+  const getVoteStatus = (postId, action) => {
+    let returnableValue = false;
+    let prevVoteStatus = 0;
+
+    const updatedPosts = postsList.map(post => {
+      if (post.id === postId) {
+        prevVoteStatus = post.vote_action;
+        console.log(`Preparing Post Action: ${post.vote_action}...`);
+        if (post.vote_action === action) {
+          console.log(`[Post ID: ${postId}] Vote action changed to 0`);
+          post.vote_action = 0;
+          returnableValue = true;
+        } else {
+          console.log(`[Post ID: ${postId}] Vote action changed to ${action}`);
+          post.vote_action = action;
+          returnableValue = false
+        }
+      }
+
+      return post;
+    });
+
+    setPostsList(updatedPosts);
+    return { returnableValue, prevVoteStatus };
+  }
+
   const handleUpVote = async (postId) => {
-    const result = await sendVoteData(postId, postAction.UpVote);
-    if (result) {
-      handleVoteUpdate(postAction.UpVote, postId);
+    const voteStatus = getVoteStatus(postId, postAction.Increase);
+
+    if (voteStatus.returnableValue) {
+      console.log("Removing upvote...");
+      const result = await sendRemoveVote(postId);
+
+      if (result) {
+        handleVoteUpdate(postId, postAction.Decrease);
+      } else {
+        console.error(`[Post ID: ${postId}] Failed to process action`);
+        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+      }
     } else {
-      notificationStore.addNotification("Failed to process your voice.", "err");
+      console.log("Upvoting post...");
+      const result = await sendVoteData(postId, postAction.Increase);
+
+      if (result) {
+        if (voteStatus.prevVoteStatus === postAction.Decrease) {
+          handleVoteUpdate(postId, postAction.Increase, 2);
+        } else {
+          handleVoteUpdate(postId, postAction.Increase, 1);
+        }
+      } else {
+        console.error(`[Post ID: ${postId}] Failed to process action`);
+        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+      }
     }
   }
 
   const handleDownVote = async (postId) => {
-    const result = await sendVoteData(postId, postAction.DownVote);
-    if (result) {
-      handleVoteUpdate(postAction.DownVote, postId);
+    const voteStatus = getVoteStatus(postId, postAction.Decrease);
+
+    if (voteStatus.returnableValue) {
+      console.log("Removing DownVote...");
+      const result = await sendRemoveVote(postId);
+
+      if (result) {
+        handleVoteUpdate(postId, postAction.Increase);
+
+      } else {
+        console.error(`[Post ID: ${postId}] Failed to process action`);
+        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+      }
     } else {
-      notificationStore.addNotification("Failed to process your voice.", "err");
+      console.log("DownVoting post...");
+      const result = await sendVoteData(postId, postAction.Decrease);
+
+      if (result) {
+        if (voteStatus.prevVoteStatus === postAction.Increase) {
+          handleVoteUpdate(postId, postAction.Decrease, 2);
+        } else {
+          handleVoteUpdate(postId, postAction.Decrease, 1);
+        }
+      } else {
+        console.error(`[Post ID: ${postId}] Failed to process action`);
+        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+      }
     }
   }
 
   // TODO: Fix posts text overflow
-  // TODO: Use markdown sanitizer while rendering posts
 
   return (
     <>
@@ -126,13 +201,19 @@ function Posts() {
             }
             <div className="post-actions">
               <div>
-                <button onClick={() => handleUpVote(post.id)}>
-                  <UpVoteIcon className="post-action-vote" />
-                </button>
+                <UpVoteButton 
+                  handleUpVote={handleUpVote} 
+                  postId={post.id} 
+                  buttonStatus={post.vote_action} 
+                  reqAction={postAction.Increase} 
+                />
                 <div className="post-action-separator"></div>
-                <button onClick={() => handleDownVote(post.id)}>
-                  <DownVoteIcon className="post-action-vote" />
-                </button>
+                <DownVoteButton 
+                  handleDownVote={handleDownVote} 
+                  postId={post.id} 
+                  buttonStatus={post.vote_action} 
+                  reqAction={postAction.Decrease} 
+                />
                 <p>{post.votes_amount}</p>
               </div>
               <div>

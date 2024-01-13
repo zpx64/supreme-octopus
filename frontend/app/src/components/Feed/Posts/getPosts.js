@@ -1,4 +1,4 @@
-import notificationStore from "utils/Notifications/NotificationsStore";
+import notificationStore from "utils/Notifications/notificationsStore";
 import { getTokens } from "utils/TokensManagment/TokensManagment";
 
 async function getPosts() {
@@ -17,16 +17,14 @@ async function getPosts() {
         })
 
         const data = await response.json();
-        console.log(data);
 
         if (data.error === "null") {
             return data.posts;
         } else {
-            return null;
+            return false;
         }
     } catch(error) {
-        console.error(error);
-        return null;
+        return false;
     }
 }
 

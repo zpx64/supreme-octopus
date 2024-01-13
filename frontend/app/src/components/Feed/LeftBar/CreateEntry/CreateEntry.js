@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { marked } from 'marked';
 import insane from 'insane';
-import notificationStore from 'utils/Notifications/NotificationsStore';
+import notificationStore from 'utils/Notifications/notificationsStore';
 import { createPost, registerImages } from './sendData';
 
 import './CreateEntry.css';

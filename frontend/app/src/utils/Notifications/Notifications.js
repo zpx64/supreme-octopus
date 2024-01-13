@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import notificationStore from './NotificationsStore';
+import notificationStore from './notificationsStore';
 import './Notifications.css'
 
 const NotificationBuilder = ({ message, status, removeNotification, id }) => {

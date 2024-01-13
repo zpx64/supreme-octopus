@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { setTokens } from 'utils/TokensManagment/TokensManagment';
-import notificationStore from 'utils/Notifications/NotificationsStore';
+import notificationStore from 'utils/Notifications/notificationsStore';
 
 
 function returnValidationScheme(action) {
@@ -123,14 +123,9 @@ async function sendSignUpDataToServer(formData, fullNameEnabled) {
         notificationStore.addNotification("Registration successful", "success");
         console.log(formData);
 
-        const newFormData = {
-          email: formData.email,
-          password: formData.password
-        }
-
         const loginResponse = sendLoginDataToServer({email: formData.email, password: formData.password});
 
-        if (loginResponse == true) {
+        if (loginResponse === true) {
           notificationStore.addNotification("Failed to login automatically.", "err");
         }
 

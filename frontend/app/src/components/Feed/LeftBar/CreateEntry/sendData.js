@@ -1,7 +1,7 @@
 import Buffer from 'buffer';
 import base85 from 'base85';
 import { getTokens } from "utils/TokensManagment/TokensManagment"
-import notificationStore from 'utils/Notifications/NotificationsStore';
+import notificationStore from 'utils/Notifications/notificationsStore';
 
 
 const PadBuffer = (buffer) => {
@@ -46,9 +46,10 @@ async function createPost(type, text, attachments) {
             notificationStore.addNotification(`Post type "${postTypeName}" created`, 'success');
         } else {
             notificationStore.addNotification('Creation phase failed', 'err');
+            return false;
         }
     } catch(error) {
-        console.log(error);
+        return false;
     }
 }
 
@@ -91,14 +92,13 @@ async function registerImages(images) {
             if (data.error === "null") {
                 return data.writed_ids
             } else {
-                console.log(data.error);
-                notificationStore.addNotification('Error while processing images', 'err');
+                return false;
             }
         } catch(error) {
-            console.log(error);
+            return false;
         }
     } catch(error) {
-        console.log(error);
+        return false;
     }
 }
 
