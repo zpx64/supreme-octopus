@@ -100,7 +100,7 @@ async function sendSignUpDataToServer(formData, fullNameEnabled) {
   const sendData = async (jsonData) => {
     notificationStore.addNotification("Registering account...", "warn");
     try {
-      const response = await fetch('http://localhost:80/api/reg', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_DOMAIN}/api/reg`, {
         method: 'POST',
         body: jsonData,
       });
@@ -184,7 +184,7 @@ async function sendLoginDataToServer(formData) {
   const sendData = async (jsonData) => {
     notificationStore.addNotification("Logging into your account...", "warn");
     try {
-      const response = await fetch('http://localhost:80/api/login', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_DOMAIN}/api/login`, {
         method: 'POST',
         body: jsonData,
       });
