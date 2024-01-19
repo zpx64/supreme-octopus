@@ -220,7 +220,7 @@ func ListPosts(
 		 FROM users_posts AS up
 		 JOIN users AS u 
 		 ON u.user_id = up.user_id
-		 ORDER BY up.creation_date
+		 ORDER BY up.creation_date DESC
 		 LIMIT $1
 		 OFFSET $2`,
 		limit, offset,
@@ -262,6 +262,45 @@ func ListPosts(
 	}
 
 	return posts, nil
+}
+
+func GetPost(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	postId int,
+) (model.UserNPost, error) {
+	var userPost model.UserNPost
+	err := conn.QueryRow(ctx,
+		`SELECT u.nickname, u.avatar_img,
+		        up.post_id, up.creation_date, up.post_type,
+		        up.body, up.attachments,
+		        up.votes_amount, up.comments_amount,
+		        up.is_comments_disallowed
+		 FROM users_posts AS up
+		 JOIN users AS u 
+		 ON u.user_id = up.user_id
+		 WHERE up.post_id = $1`,
+		postId,
+	).Scan(
+		&userPost.User.Nickname,
+		&userPost.User.AvatarImg,
+		&userPost.Post.PostId,
+		&userPost.Post.CreationDate,
+		&userPost.Post.PostType,
+		&userPost.Post.Body,
+		&userPost.Post.Attachments,
+		&userPost.Post.VotesAmount,
+		&userPost.Post.CommentsAmount,
+		&userPost.Post.IsCommentsDisallowed,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return model.UserNPost{}, vars.ErrNotInDb
+		}
+		return model.UserNPost{}, err
+	}
+
+	return userPost, nil
 }
 
 func IsPostVoted(

@@ -28,9 +28,8 @@ var (
 
 // TODO: disable attachments in model.PostArticle
 type Input struct {
-	AccessToken string `json:"access_token" validate:"required,min=5,max=100"`
-	Offset      uint   `json:"offset"`
-	Limit       uint   `json:"limit"        validate:"required,max=35"`
+	AccessToken string `json:"access_token"  validate:"required,min=5,max=100"`
+  PostId      int    `json:"post_id"       validate:"required,min=1"`
 }
 
 type Post struct {
@@ -48,7 +47,7 @@ type Post struct {
 }
 
 type Output struct {
-	Posts  []Post `json:"posts"`
+	Post   Post   `json:"post"`
 	Err    string `json:"error"`
 	Status int    `json:"-"`
 }
@@ -141,12 +140,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var (
-		posts []model.UserNPost
+		post model.UserNPost
 	)
 	err = dbConn.AcquireFunc(ctx,
 		func(c *pgxpool.Conn) error {
-			posts, err = db.ListPosts(ctx, c,
-				in.Offset, in.Limit,
+			post, err = db.GetPost(ctx, c,
+				in.PostId,
 			)
 			return err
 		},
@@ -161,20 +160,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	voteActions := make([]model.VoteAction, len(posts))
+	var voteAction model.VoteAction
 	if userId != 0 {
 		err = dbConn.AcquireFunc(ctx,
 			func(c *pgxpool.Conn) error {
-				// TODO: optimize without loop
-				for i, e := range posts {
-					voteAction, err := db.IsPostVoted(ctx, c,
-						userId, e.Post.PostId,
-					)
-					if err != nil {
-						return err
-					}
-					voteActions[i] = voteAction
-				}
+        voteActionLocal, err := db.IsPostVoted(ctx, c,
+          userId, in.PostId,
+        )
+        if err != nil {
+          return err
+        }
+        voteAction = voteActionLocal
 				return nil
 			},
 		)
@@ -189,21 +185,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	out.Posts = make([]Post, len(posts))
-	for i, e := range posts {
-		out.Posts[i] = Post{
-			Nickname:             e.User.Nickname,
-			AvatarImg:            e.User.AvatarImg,
-			Id:                   e.Post.PostId,
-			CreationDate:         e.Post.CreationDate,
-			Type:                 e.Post.PostType,
-			Body:                 e.Post.Body,
-			Attachments:          e.Post.Attachments,
-			VotesAmount:          e.Post.VotesAmount,
-			VoteAction:           voteActions[i],
-			CommentsAmount:       e.Post.CommentsAmount,
-			IsCommentsDisallowed: e.Post.IsCommentsDisallowed,
-		}
+		out.Post = Post{
+			Nickname:             post.User.Nickname,
+			AvatarImg:            post.User.AvatarImg,
+			Id:                   post.Post.PostId,
+			CreationDate:         post.Post.CreationDate,
+			Type:                 post.Post.PostType,
+			Body:                 post.Post.Body,
+			Attachments:          post.Post.Attachments,
+			VotesAmount:          post.Post.VotesAmount,
+			VoteAction:           voteAction,
+			CommentsAmount:       post.Post.CommentsAmount,
+			IsCommentsDisallowed: post.Post.IsCommentsDisallowed,
 	}
 
 	log.Debug().
