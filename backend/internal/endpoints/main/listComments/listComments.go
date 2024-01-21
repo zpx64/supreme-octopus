@@ -157,9 +157,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  commentThreads := ConvertArrayOfCommentsToGraphOfComments(comments)
+	commentThreads := ConvertArrayOfCommentsToGraphOfComments(comments)
 
-  out.Comments = commentThreads
+	out.Comments = commentThreads
 
 	log.Info().Interface("comments_from_db", comments).Msg("converting array to graph")
 

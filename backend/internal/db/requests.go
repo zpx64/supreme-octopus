@@ -569,9 +569,9 @@ func GetCommentsByPostId(
 		postId,
 	)
 	if err != nil {
-    if err == pgx.ErrNoRows {
-      return nil, vars.ErrNotInDb
-    }
+		if err == pgx.ErrNoRows {
+			return nil, vars.ErrNotInDb
+		}
 		return nil, err
 	}
 	defer rows.Close()
