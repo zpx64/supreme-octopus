@@ -3,7 +3,6 @@ function DownVoteIcon({ fillColor }) {
 
     if (fillColor) {
        color = fillColor; 
-       console.log(color);
     } 
 
     return (

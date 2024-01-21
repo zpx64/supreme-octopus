@@ -26,10 +26,18 @@ function Posts() {
 
   useEffect(() => {
     const fetchPosts = async () => {
+      let posts;
+      
       try {
         const posts = await getPosts();
+
         if (posts) {
-          setPostsList(posts);
+          const postsData = posts.map(post => ({
+            ...post,
+            vote_lock: false
+          }));
+
+          setPostsList(postsData);
         } else {
           console.error("Error fetching posts, trying to refresh tokens...");
           const refreshResult = refreshTokens();
@@ -42,7 +50,12 @@ function Posts() {
           const posts = await getPosts();
 
           if (posts) {
-            setPostsList(posts);
+            const postsData = posts.map(post => ({
+              ...post,
+              vote_lock: false
+            }));
+
+            setPostsList(postsData);
           } else {
             console.error("Failed to load feed");
             notificationStore.addNotification("Failed to load feed", "err");
@@ -77,10 +90,10 @@ function Posts() {
     const updatedPosts = postsList.map(post => {
       if (post.id === postId) {
         if (action === 1) {
-          console.log(`[Post ID: ${postId}] Votes amount increased on the client side`);
+          console.log(`[PostID: ${postId}] Votes amount increased on the client side`);
           return { ...post, votes_amount: post.votes_amount + size };
         } else if (action === 2) {
-          console.log(`[Post ID: ${postId}] Votes amount decreased on the client side`);
+          console.log(`[PostID: ${postId}] Votes amount decreased on the client side`);
           return { ...post, votes_amount: post.votes_amount - size };
         }
       }
@@ -97,13 +110,13 @@ function Posts() {
     const updatedPosts = postsList.map(post => {
       if (post.id === postId) {
         prevVoteStatus = post.vote_action;
-        console.log(`Preparing Post Action: ${post.vote_action}...`);
+        console.log(`[PostID: ${postId}] Preparing Post Action: ${post.vote_action}...`);
         if (post.vote_action === action) {
-          console.log(`[Post ID: ${postId}] Vote action changed to 0`);
+          console.log(`[PostID: ${postId}] Vote action changed to 0`);
           post.vote_action = 0;
           returnableValue = true;
         } else {
-          console.log(`[Post ID: ${postId}] Vote action changed to ${action}`);
+          console.log(`[PostID: ${postId}] Vote action changed to ${action}`);
           post.vote_action = action;
           returnableValue = false
         }
@@ -116,64 +129,110 @@ function Posts() {
     return { returnableValue, prevVoteStatus };
   }
 
-  const handleUpVote = async (postId) => {
-    const voteStatus = getVoteStatus(postId, postAction.Increase);
+  const getLockStatus = (postId) => {
+    const post = postsList.find(post => post.id === postId);
+    return post ? post.vote_lock : undefined;
+  }
 
-    if (voteStatus.returnableValue) {
-      console.log("Removing upvote...");
-      const result = await sendRemoveVote(postId);
-
-      if (result) {
-        handleVoteUpdate(postId, postAction.Decrease);
-      } else {
-        console.error(`[Post ID: ${postId}] Failed to process action`);
-        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
-      }
-    } else {
-      console.log("Upvoting post...");
-      const result = await sendVoteData(postId, postAction.Increase);
-
-      if (result) {
-        if (voteStatus.prevVoteStatus === postAction.Decrease) {
-          handleVoteUpdate(postId, postAction.Increase, 2);
-        } else {
-          handleVoteUpdate(postId, postAction.Increase, 1);
+  const setLockStatus = (postId, status) => {
+    setPostsList(prevPosts => {
+      const updatedPosts = prevPosts.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            vote_lock: status
+          };
         }
+        return post;
+      });
+      return updatedPosts;
+    });
+  };
+
+  const handleUpVote = async (postId) => {
+    const lockStatus = await getLockStatus(postId);
+
+    if (lockStatus === false) {
+      const voteStatus = getVoteStatus(postId, postAction.Increase);
+
+      if (voteStatus.returnableValue) {
+        console.log(`[PostID: ${postId}] Removing Upvote...`);
+
+        await setLockStatus(postId, true)
+        const result = await sendRemoveVote(postId);
+
+        if (result) {
+          await handleVoteUpdate(postId, postAction.Decrease);
+        } else {
+          console.error(`[PostID: ${postId}] Failed to process action`);
+          notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+        }
+
+        await setLockStatus(postId, false);
       } else {
-        console.error(`[Post ID: ${postId}] Failed to process action`);
-        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+        console.log(`[PostID: ${postId}] Upvoting post...`);
+
+        await setLockStatus(postId, true)
+        const result = await sendVoteData(postId, postAction.Increase);
+
+        if (result) {
+          if (voteStatus.prevVoteStatus === postAction.Decrease) {
+            await handleVoteUpdate(postId, postAction.Increase, 2);
+          } else {
+            await handleVoteUpdate(postId, postAction.Increase, 1);
+          }
+        } else {
+          console.error(`[PostID: ${postId}] Failed to process action`);
+          notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+        }
+
       }
+
+      await setLockStatus(postId, false);
+    } else {
+      console.warn(`[PostID: ${postId}] Votes is locked`);
     }
   }
 
   const handleDownVote = async (postId) => {
-    const voteStatus = getVoteStatus(postId, postAction.Decrease);
+    const lockStatus = await getLockStatus(postId);
 
-    if (voteStatus.returnableValue) {
-      console.log("Removing DownVote...");
-      const result = await sendRemoveVote(postId);
+    if (lockStatus === false) {
+      const voteStatus = getVoteStatus(postId, postAction.Decrease);
 
-      if (result) {
-        handleVoteUpdate(postId, postAction.Increase);
+      if (voteStatus.returnableValue) {
+        console.log(`[PostID: ${postId}] Removing Downvote...`);
 
-      } else {
-        console.error(`[Post ID: ${postId}] Failed to process action`);
-        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
-      }
-    } else {
-      console.log("DownVoting post...");
-      const result = await sendVoteData(postId, postAction.Decrease);
+        await setLockStatus(postId, true);
+        const result = await sendRemoveVote(postId);
 
-      if (result) {
-        if (voteStatus.prevVoteStatus === postAction.Increase) {
-          handleVoteUpdate(postId, postAction.Decrease, 2);
+        if (result) {
+          handleVoteUpdate(postId, postAction.Increase);
         } else {
-          handleVoteUpdate(postId, postAction.Decrease, 1);
+          console.error(`[PostID: ${postId}] Failed to process action`);
+          notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
         }
       } else {
-        console.error(`[Post ID: ${postId}] Failed to process action`);
-        notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+        console.log(`[PostID: ${postId}] Downvoting post...`);
+
+        await setLockStatus(postId, true);
+        const result = await sendVoteData(postId, postAction.Decrease);
+
+        if (result) {
+          if (voteStatus.prevVoteStatus === postAction.Increase) {
+            await handleVoteUpdate(postId, postAction.Decrease, 2);
+          } else {
+            await handleVoteUpdate(postId, postAction.Decrease, 1);
+          }
+        } else {
+          console.error(`[PostID: ${postId}] Failed to process action`);
+          notificationStore.addNotification(NOTIFICATIONS.FAILED_VOTE.message, NOTIFICATIONS.FAILED_VOTE.type);
+        }
       }
+
+      await setLockStatus(postId, false);
+    } else {
+      console.warn(`[PostID: ${postId}] Post is locked`);
     }
   }
 
