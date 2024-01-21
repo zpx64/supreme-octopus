@@ -32,10 +32,21 @@ type Input struct {
 	PostId      int    `json:"post_id"      validate:"required,min=1"`
 }
 
+type Comment struct {
+	CommentId    int       `json:"comment_id"`
+	Nickname     string    `json:"nickname"`
+	AvatarImg    string    `json:"avatar_img"`
+	Body         string    `json:"body"`
+	Attachments  []string  `json:"attachments"`
+	CreationDate time.Time `json:"creation_date"`
+	VotesAmount  int       `json:"votes_amount"`
+	Reply        []Comment `json:"reply,optional"`
+}
+
 type Output struct {
-	Comments []model.CommentWithUser `json:"comments"`
-	Err      string                  `json:"error"`
-	Status   int                     `json:"-"`
+	Comments []Comment `json:"comments"`
+	Err      string    `json:"error"`
+	Status   int       `json:"-"`
 }
 
 func Start(n string, log *zerolog.Logger) error {
@@ -146,7 +157,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out.Comments = comments
+  commentThreads := ConvertArrayOfCommentsToGraphOfComments(comments)
+
+  out.Comments = commentThreads
+
+	log.Info().Interface("comments_from_db", comments).Msg("converting array to graph")
 
 	log.Debug().
 		Interface("input_json", in).

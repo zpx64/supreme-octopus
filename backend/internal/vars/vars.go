@@ -44,6 +44,7 @@ var (
 	ErrInternalJsonParsing                 = errors.New("28: Internal json parser error.")
 	ErrInternalMicroserviceRequest         = errors.New("29: Internal microservice request failed.")
 	ErrCommentsDisallowedForThisPost       = errors.New("30: Comments disallowed for this post.")
+	ErrCommentsThreadCorrupted             = errors.New("31: Comments thread corrupted.")
 
 	// values from env
 	// TODO: rewrite with https://github.com/Netflix/go-env

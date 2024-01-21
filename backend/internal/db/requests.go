@@ -565,10 +565,13 @@ func GetCommentsByPostId(
 		 JOIN users AS u
 		 ON u.user_id = uc.user_id
 		 WHERE post_id = $1
-		 ORDER BY reply_id DESC`,
+		 ORDER BY comment_id`,
 		postId,
 	)
 	if err != nil {
+    if err == pgx.ErrNoRows {
+      return nil, vars.ErrNotInDb
+    }
 		return nil, err
 	}
 	defer rows.Close()

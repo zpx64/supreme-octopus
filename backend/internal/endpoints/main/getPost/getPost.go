@@ -29,7 +29,7 @@ var (
 // TODO: disable attachments in model.PostArticle
 type Input struct {
 	AccessToken string `json:"access_token"  validate:"required,min=5,max=100"`
-  PostId      int    `json:"post_id"       validate:"required,min=1"`
+	PostId      int    `json:"post_id"       validate:"required,min=1"`
 }
 
 type Post struct {
@@ -164,13 +164,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if userId != 0 {
 		err = dbConn.AcquireFunc(ctx,
 			func(c *pgxpool.Conn) error {
-        voteActionLocal, err := db.IsPostVoted(ctx, c,
-          userId, in.PostId,
-        )
-        if err != nil {
-          return err
-        }
-        voteAction = voteActionLocal
+				voteActionLocal, err := db.IsPostVoted(ctx, c,
+					userId, in.PostId,
+				)
+				if err != nil {
+					return err
+				}
+				voteAction = voteActionLocal
 				return nil
 			},
 		)
@@ -185,18 +185,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-		out.Post = Post{
-			Nickname:             post.User.Nickname,
-			AvatarImg:            post.User.AvatarImg,
-			Id:                   post.Post.PostId,
-			CreationDate:         post.Post.CreationDate,
-			Type:                 post.Post.PostType,
-			Body:                 post.Post.Body,
-			Attachments:          post.Post.Attachments,
-			VotesAmount:          post.Post.VotesAmount,
-			VoteAction:           voteAction,
-			CommentsAmount:       post.Post.CommentsAmount,
-			IsCommentsDisallowed: post.Post.IsCommentsDisallowed,
+	out.Post = Post{
+		Nickname:             post.User.Nickname,
+		AvatarImg:            post.User.AvatarImg,
+		Id:                   post.Post.PostId,
+		CreationDate:         post.Post.CreationDate,
+		Type:                 post.Post.PostType,
+		Body:                 post.Post.Body,
+		Attachments:          post.Post.Attachments,
+		VotesAmount:          post.Post.VotesAmount,
+		VoteAction:           voteAction,
+		CommentsAmount:       post.Post.CommentsAmount,
+		IsCommentsDisallowed: post.Post.IsCommentsDisallowed,
 	}
 
 	log.Debug().
