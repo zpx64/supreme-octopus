@@ -241,7 +241,7 @@ function Posts() {
   return (
     <>
       <div className="posts-container">
-        {postsList.toReversed().map(post => (
+        {postsList.map(post => (
           <div className="post-window" key={post.id}>
             <div className="post-header">
               <p>{post.type === 1 ? `article / ${post.nickname}` : `note / ${post.nickname}`}</p>
