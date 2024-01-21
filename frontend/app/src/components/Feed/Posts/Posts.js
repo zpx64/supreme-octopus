@@ -62,6 +62,8 @@ function Posts() {
           }
         }
       } catch (error) {
+        // TODO: Write normal error handling
+        // TODO: Retry post fetching
         console.error("Error fetching posts", error);
       }
     };
@@ -152,6 +154,7 @@ function Posts() {
   const handleUpVote = async (postId) => {
     const lockStatus = await getLockStatus(postId);
 
+    // TODO: Fix function body
     if (lockStatus === false) {
       const voteStatus = getVoteStatus(postId, postAction.Increase);
 
@@ -197,6 +200,7 @@ function Posts() {
   const handleDownVote = async (postId) => {
     const lockStatus = await getLockStatus(postId);
 
+    // TODO: Fix function body
     if (lockStatus === false) {
       const voteStatus = getVoteStatus(postId, postAction.Decrease);
 
