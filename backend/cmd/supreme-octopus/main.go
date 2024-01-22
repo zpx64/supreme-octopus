@@ -14,6 +14,7 @@ import (
 
 	// endpoints
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/commentNew"
+	"github.com/zpx64/supreme-octopus/internal/endpoints/main/commentVote"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/delVote"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/getPost"
 	"github.com/zpx64/supreme-octopus/internal/endpoints/main/listComments"
@@ -51,6 +52,7 @@ var (
 		{"/get_post", getPost.Start, getPost.Handler, getPost.Stop},
 		{"/list_comments", listComments.Start, listComments.Handler, listComments.Stop},
 		{"/post_vote", postVote.Start, postVote.Handler, postVote.Stop},
+		{"/comment_vote", commentVote.Start, commentVote.Handler, commentVote.Stop},
 		{"/del_vote", delVote.Start, delVote.Handler, delVote.Stop},
 	}
 	logger zerolog.Logger

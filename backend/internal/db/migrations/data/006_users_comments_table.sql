@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users_comments (
   -- I don't know if links should be used or something else.
   -- but it should be converted into some sort of graph
   -- and then send it to the frontend afterwards
-)
+);
 
 ---- create above / drop below ----
 

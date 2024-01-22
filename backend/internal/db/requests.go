@@ -604,3 +604,125 @@ func GetCommentsByPostId(
 
 	return comments, nil
 }
+
+func IsCommentExists(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	postId int,
+) (bool, error) {
+	var existsComment bool
+	err := conn.QueryRow(ctx,
+		`SELECT EXISTS(SELECT 1 FROM users_comments
+		 WHERE comment_id = $1)`,
+		postId,
+	).Scan(&existsComment)
+	if err != nil {
+		return false, err
+	}
+
+	return existsComment, nil
+}
+
+func VoteComment(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	userId int,
+	commentId int,
+	voteType model.VoteAction,
+	creationDate time.Time,
+) (int, error) {
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback(ctx)
+
+	existsComment, err := IsCommentExists(ctx, conn, commentId)
+	if err != nil {
+		return 0, err
+	}
+
+	if !existsComment {
+		return 0, vars.ErrNotInDb
+	}
+
+	var (
+		voteTypeFromDb model.VoteAction
+		likeId         int
+		existsLike     bool
+	)
+	err = tx.QueryRow(ctx,
+		`SELECT vote_type, like_id FROM users_comments_likes
+		 WHERE comment_id = $1 AND user_id = $2`,
+		commentId, userId,
+	).Scan(&voteTypeFromDb, &likeId)
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			return 0, err
+		}
+	} else {
+		existsLike = true
+	}
+
+	if existsLike {
+		if voteTypeFromDb == voteType {
+			return likeId, nil
+		}
+	}
+
+	var (
+		id int
+	)
+	if !existsLike {
+		err = tx.QueryRow(ctx,
+			`INSERT INTO users_comments_likes (
+         user_id, comment_id, 
+         vote_type, creation_date
+       )
+			 VALUES ($1, $2, $3, $4)
+			 RETURNING like_id`,
+			userId, commentId, voteType, creationDate,
+		).Scan(&id)
+	} else {
+		err = tx.QueryRow(ctx,
+			`UPDATE users_comments_likes
+			 SET vote_type = $3,
+			     creation_date = $4
+			 WHERE user_id = $1 AND comment_id = $2
+			 RETURNING like_id`,
+			userId, commentId,
+			voteType, creationDate,
+		).Scan(&id)
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	var (
+		votesAppend = 1
+	)
+	if existsLike {
+		if voteType != voteTypeFromDb {
+			votesAppend += 1
+		}
+	}
+	if voteType == model.VoteDownvote {
+		votesAppend = -votesAppend
+	}
+
+	_, err = tx.Exec(ctx,
+		`UPDATE users_comments
+		 SET votes_amount = votes_amount + $1
+		 WHERE comment_id = $2`,
+		votesAppend, commentId,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}

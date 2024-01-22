@@ -22,15 +22,9 @@ func ConvertArrayOfCommentsToGraphOfComments(
 	comments []model.CommentWithUser,
 ) []Comment {
 	var (
-		commentsMap    = make(map[int]int, len(comments))
 		commentThreads = make([]Comment, 0, len(comments))
 		commentsUsed   = make(map[int]struct{}, len(comments))
 	)
-
-	// fill map
-	for i, e := range comments {
-		commentsMap[e.CommentId] = i
-	}
 
 	var genGraph func([]model.CommentWithUser, *Comment)
 	genGraph = func(comments []model.CommentWithUser, comment *Comment) {
