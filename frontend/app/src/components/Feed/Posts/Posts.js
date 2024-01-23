@@ -40,11 +40,12 @@ function Posts() {
           setPostsList(postsData);
         } else {
           console.error("Error fetching posts, trying to refresh tokens...");
-          const refreshResult = refreshTokens();
+          const refreshResult = await refreshTokens();
 
           if (refreshResult !== "success") {
             console.warn("Failed to refresh tokens, redirecting to login page...");
             navigate("/login");
+            return;
           }
 
           const posts = await getPosts();

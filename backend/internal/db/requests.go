@@ -124,6 +124,28 @@ func GetCredentialsByEmail(
 		Pow:      credentials_pow,
 	}, nil
 }
+func GetRefreshToken(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	refreshToken string,
+) (int, int64, error) {
+  var (
+    unixDate int64
+    dbId     int
+  )
+
+  err := conn.QueryRow(ctx,
+    `SELECT token_id, token_date
+     FROM users_tokens
+     WHERE refresh_token = $1`,
+    refreshToken,
+  ).Scan(&dbId, &unixDate)
+  if err != nil {
+    return 0, 0, err
+  }
+
+  return dbId, unixDate, nil
+}
 
 func InsertNewToken(
 	ctx context.Context,

@@ -149,8 +149,26 @@ func RegenTokensPair(
 		tokens.accessTokens.Del(access)
 	}
 
-	t, ok := tokens.refreshTokens.Get(refresh)
-	if !ok {
+	var (
+		t refreshToken
+	)
+	err := dbConnPool.AcquireFunc(ctx,
+		func(c *pgxpool.Conn) error {
+			var err error
+			t.dbId, t.date, err = db.GetRefreshToken(ctx, c, refresh)
+			return err
+		},
+	)
+	if err != nil {
+		if err == vars.ErrNotInDb {
+			return 0, "", err
+		}
+
+		logger.Warn().Err(err).Msg("auth: error with db")
+		return 0, "", vars.ErrWithDb
+	}
+
+	if err != nil {
 		return 0, "", vars.ErrAuthRefreshTNotFound
 	}
 	if timeNow-t.date > vars.RefreshTokenLifeSeconds {
