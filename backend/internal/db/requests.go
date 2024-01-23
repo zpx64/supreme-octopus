@@ -726,3 +726,64 @@ func VoteComment(
 	}
 	return id, nil
 }
+
+func RemoveCommentVote(
+	ctx context.Context,
+	conn *pgxpool.Conn,
+	commentId int,
+	userId int,
+) error {
+	postExists, err := IsCommentExists(ctx, conn, commentId)
+	if err != nil {
+		return err
+	}
+	if !postExists {
+		return vars.ErrNotInDb
+	}
+
+	var voteAction model.VoteAction
+	err = conn.QueryRow(ctx,
+		`SELECT vote_type FROM users_comments_likes
+		 WHERE comment_id = $1 AND user_id = $2`,
+		commentId, userId,
+	).Scan(&voteAction)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return vars.ErrNotInDb
+		}
+		return err
+	}
+
+	recoveredVotes := 0
+	if voteAction == model.VoteUpvote {
+		recoveredVotes = -1
+	} else if voteAction == model.VoteDownvote {
+		recoveredVotes = 1
+	}
+
+	_, err = conn.Exec(ctx,
+		`UPDATE users_comments
+		 SET votes_amount = votes_amount + $1
+		 WHERE comment_id = $2`,
+		recoveredVotes, commentId,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return vars.ErrNotInDb
+		}
+		return err
+	}
+
+	cmdTag, err := conn.Exec(ctx,
+		`DELETE FROM users_comments_likes 
+		 WHERE comment_id = $1 AND user_id = $2`,
+		commentId, userId,
+	)
+	if cmdTag.RowsAffected() == 0 {
+		return vars.ErrNotInDb
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
