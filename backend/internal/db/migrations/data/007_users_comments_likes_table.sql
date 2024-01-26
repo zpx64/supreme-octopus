@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users_comments_likes (
 
 ---- create above / drop below ----
 
-DROP TABLE IF NOT EXISTS users_comments_likes;
+DROP TABLE IF EXISTS users_comments_likes;
 
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

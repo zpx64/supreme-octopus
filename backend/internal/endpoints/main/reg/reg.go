@@ -156,7 +156,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	hashedPassword := utils.HashPassWithPows(in.Password, localPow)
 
 	// TODO: rewrite with global contant
-	dbModel := model.UserNCred{
+	dbModel := model.UserNCredNInfo{
 		User: model.User{
 			Nickname:     in.Nickname,
 			AvatarImg:    "default",
@@ -169,6 +169,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Password: hashedPassword,
 			Pow:      localPow,
 		},
+    Info: model.UserInfo{
+      SocialLinks: []string{},
+    }, // should be empty on first registration
 	}
 
 	ctx, cancel := context.WithTimeout(

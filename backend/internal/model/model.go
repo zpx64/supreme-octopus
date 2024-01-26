@@ -18,9 +18,10 @@ const (
 	VoteDownvote
 )
 
-type UserNCred struct {
+type UserNCredNInfo struct {
 	User        User            `json:"user"`
 	Credentials UserCredentials `json:"credentials"`
+  Info        UserInfo        `json:"info"`
 }
 
 type UserNPost struct {
@@ -55,6 +56,15 @@ type UserCredentials struct {
 	Pow      string `json:"pow"`
 	// i really hate local pows
 	// but i think we need it(
+}
+
+type UserInfo struct {
+	UserId      int      `json:"user_id"`
+	Pronounse   string   `json:"pronounse"`
+	Gender      bool     `json:"gender"`
+	About       string   `json:"about"`
+	AboutLine   string   `json:"about_line"`
+	SocialLinks []string `json:"social_links"`
 }
 
 type UserToken struct {

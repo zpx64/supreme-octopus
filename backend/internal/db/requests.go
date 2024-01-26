@@ -16,7 +16,7 @@ import (
 func IsUserExist(
 	ctx context.Context,
 	conn *pgxpool.Conn,
-	data *model.UserNCred,
+	data *model.UserNCredNInfo,
 ) (bool, error) {
 	exists := [2]bool{}
 
@@ -53,7 +53,7 @@ func IsUserExist(
 func CreateUser(
 	ctx context.Context,
 	conn *pgxpool.Conn,
-	data *model.UserNCred,
+	data *model.UserNCredNInfo,
 ) (int, error) {
 	exist, err := IsUserExist(ctx, conn, data)
 	if err != nil {
@@ -65,20 +65,38 @@ func CreateUser(
 
 	id := 0
 	err = conn.QueryRow(ctx,
-		`WITH new_user_id AS (
-		   INSERT INTO users (nickname, avatar_img, creation_date, name, surname)
+		`WITH new_user AS (
+		   INSERT INTO users (
+         nickname, avatar_img, 
+         creation_date, name, surname
+       )
 		   VALUES ($1, $2, $3, $4, $5)
 		   RETURNING user_id 
-		 )
+     ), new_user_info AS (
+       INSERT INTO users_info (
+         user_id, pronounse,
+         gender, about, about_line,
+         social_links
+       )
+       VALUES (
+         (SELECT user_id FROM new_user),
+         $9, $10, $11, $12, $13
+       )
+       RETURNING user_id
+     )
 		 INSERT INTO users_credentials (user_id, email, password, pow)
-		 SELECT user_id, $6, $7, $8
-		 FROM new_user_id
+       SELECT user_id, $6, $7, $8
+       FROM new_user
 		 RETURNING user_id`,
 		data.User.Nickname, data.User.AvatarImg,
 		data.User.CreationDate,
 		data.User.Name, data.User.Surname,
 		data.Credentials.Email, data.Credentials.Password,
 		data.Credentials.Pow,
+
+    data.Info.Pronounse, data.Info.Gender,
+    data.Info.About, data.Info.AboutLine,
+    data.Info.SocialLinks,
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -129,22 +147,22 @@ func GetRefreshToken(
 	conn *pgxpool.Conn,
 	refreshToken string,
 ) (int, int64, error) {
-  var (
-    unixDate int64
-    dbId     int
-  )
+	var (
+		unixDate int64
+		dbId     int
+	)
 
-  err := conn.QueryRow(ctx,
-    `SELECT token_id, token_date
+	err := conn.QueryRow(ctx,
+		`SELECT token_id, token_date
      FROM users_tokens
      WHERE refresh_token = $1`,
-    refreshToken,
-  ).Scan(&dbId, &unixDate)
-  if err != nil {
-    return 0, 0, err
-  }
+		refreshToken,
+	).Scan(&dbId, &unixDate)
+	if err != nil {
+		return 0, 0, err
+	}
 
-  return dbId, unixDate, nil
+	return dbId, unixDate, nil
 }
 
 func InsertNewToken(
